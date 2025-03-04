@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html>
-<body>
-  <button type="button" onclick="callArkTS()">Click me!</button>
+<body style="word-wrap: break-word;">
   <p id="demo"></p>
   <script>
-    function callArkTS() {
-      // 调试：检查JSInterface是否存在
-      if (typeof window.JSInterface === 'undefined') {
-        document.getElementById("demo").innerText = "JSInterface is not defined!";
-        return;
-      }
-      
+    // 调试：检查JSInterface是否存在
+    if (typeof window.JSInterface === 'undefined') {
+      document.getElementById("demo").innerText = "JSInterface is not defined!";
+    } else {
       // 调用HarmonyOS的JSBridge方法
       window.JSInterface.getAccountInfo()
         .then((accountInfo) => {
