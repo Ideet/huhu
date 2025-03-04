@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL 跳转</title>
+    <script>
+        function getParameterByName(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        window.onload = function() {
+            const targetUrl = getParameterByName('url');
+            if (targetUrl) {
+                window.location.href = targetUrl;
+            } else {
+                document.body.innerHTML = '<h1>请提供一个有效的 URL 参数</h1>';
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>正在跳转...</h1>
+</body>
+</html>

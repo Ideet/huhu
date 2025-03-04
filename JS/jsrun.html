@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <button type="button" onclick="callArkTS()">Click me!</button>
+  <p id="demo"></p>
+  <script>
+    function callArkTS() {
+      // 调用HarmonyOS的JSBridge方法
+      window.JSInterface.getAccountInfo()
+        .then((accountInfo: IAccountInfo | null) => {
+          // 处理返回的Promise
+          if (accountInfo) {
+            // 将账户信息显示在页面上
+            document.getElementById("demo").innerText = JSON.stringify(accountInfo);
+          } else {
+            document.getElementById("demo").innerText = "No account information";
+          }
+        })
+        .catch((error: any) => {
+          // 处理错误
+          document.getElementById("demo").innerText = `Error: ${error.message}`;
+        });
+    }
+  </script>
+</body>
+</html>

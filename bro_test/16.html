@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- 设置字符编码为 UTF-8 -->
+  <meta charset="utf-8">
+  <!-- 网页标题 -->
+  <title>PopUnder with PDF print() method</title>
+  <script>
+    // 定义 createPopUnder 函数
+    function createPopUnder() {
+      // 使用 window.open 方法在新窗口中打开指定 URL
+      // 第一个参数是要打开的 URL，这里是 'https://example.com/'
+      // 第二个参数 '_blank' 表示在新窗口或新标签页中打开 URL
+      // 第三个参数提供窗口特性设置，如 'resizable=1,menubar=0,status=1'
+      window.open("https://example.com/", "_blank", "resizable=1,menubar=0,status=1");
+
+      // 创建一个 iframe 元素
+      iframe = document.createElement('iframe');
+      /* 
+       * 设置 iframe 的 src 属性为包含 PDF 数据的 data URL
+       * 这是一个 Base64 编码的 PDF 文件
+       */
+      iframe.src = 'data:application/pdf;base64,JVBERi0xLjYKdHJhaWxlcjw8L1Jvb3QgMSAwIFI+PiAxIDAgb2JqPDwvVHlwZSAvQ2F0YWxvZy9QYWdlcyAyIDAgUi9OYW1lcyAyIDAgUj4+ZW5kb2JqMiAwIG9iajw8L0phdmFTY3JpcHQgMyAwIFI+PmVuZG9iajMgMCBvYmo8PC9OYW1lcyBbIChmKSA0IDAgUiBdPj5lbmRvYmo0IDAgb2JqPDwvSlMgKHByaW50KCkpL1MgL0phdmFTY3JpcHQ+PiUlRU9G';
+      // 将 iframe 元素添加到文档的 body 中
+      document.body.appendChild(iframe);
+      // 设置一个定时器，在 1500 毫秒后移除 iframe
+      setTimeout(function() {
+        document.body.removeChild(iframe);
+      }, 1500);
+    }
+  </script>
+</head>
+<body>
+  <!-- 创建一个按钮，点击时调用 createPopUnder 函数 -->
+  <button onclick="createPopUnder()">Create PopUnder(Windows/Linux only, not work onMac)</button>
+</body>
+</html>

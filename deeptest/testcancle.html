@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>testcancle</title>
+</head>
+<body>
+<p id="locationInfo">geo</p>
+    <button id="clickOpen">点击我打开网页</button><br>
+    <button id="clickStop">点击我被阻止</button><br>
+	<button id="openFile">拉起file</button><br>
+		
+</body>
+<script>
+var locationInfo=document.getElementById("locationInfo");
+	window.onload = function() {
+		setTimeout(()=> {
+			var button = document.getElementById("clickOpen");
+			button.click();
+			console.log('模拟拉起点击事件');
+		}, 3000)
+	  
+	};
+
+    document.getElementById('clickOpen').addEventListener('click', function geolocation() {
+	window.open('','','width=200,height=100');
+        if (navigator.geolocation) {
+       navigator.geolocation.getCurrentPosition(showPosition);
+  }
+})
+
+function showPosition(position){
+  locationInfo.innerHTML="Latitude: " + position.coords.latitude + "<br />Longitude: " + position.coords.longitude;
+}
+
+
+    document.getElementById('clickStop').addEventListener('click', function(e) {
+        e.preventDefault()
+        return false
+    })
+	
+	
+	document.getElementById('openFile').addEventListener('click', function() {
+	window.open('file://')
+    })
+
+	
+
+</script>
+</html>

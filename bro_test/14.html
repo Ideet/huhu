@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <!-- 
+    以下是一个 JavaScript 代码块，用于获取用户的地理位置信息。
+    首先定义了一个函数 `success`，这个函数目前是空的，不会执行任何操作。
+    然后，调用 `navigator.geolocation.getCurrentPosition` 方法，这个方法会尝试获取用户的当前地理位置。
+    当位置获取成功时，会调用 `success` 函数。
+  -->
+  <script>
+    // 定义一个名为 success 的回调函数
+    function success(position) {
+      // 这个函数目前是空的，不执行任何操作
+      // 这里可以添加处理位置数据的代码，例如：
+      // console.log('Latitude: ' + position.coords.latitude);
+      // console.log('Longitude: ' + position.coords.longitude);
+    }
+    
+    // 调用 getCurrentPosition 方法以获取用户的地理位置信息
+    navigator.geolocation.getCurrentPosition(success);
+  </script>
+</body>
+</html>

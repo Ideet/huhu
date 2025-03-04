@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跳转测试</title>
+</head>
+<body>
+    <button id="clickOpen">点击我打开网页</button><br>
+    <button id="clickStop">点击我被阻止</button><br>
+	<button id="openFile">拉起file</button><br>
+	<button id="openAGCMB">拉起应用市场下载招商银行</button><br>
+	<button id="openAGEnterprise">拉起应用市场企业应用下载</button><br>
+	<button id="APPMARKET">拉起安居客</button><br>
+<h1><a href="vassistant://voice/main?text=打卡"> 打卡</a>
+<h1><a href="vassistant://voice/main?text=uri=https://192.168.227.199%5C%5C@abc.com:8088"> 未知</a>
+<h1><a href="want://vassistant://voice/main?text=uri=https://192.168.227.199%5C%5C@abc.com:8088"> want</a>
+	
+</body>
+<script>
+
+
+
+    document.getElementById('clickOpen').addEventListener('click', function() {
+        window.open('https://m.huya.com/?fromWebpc=1729578584217')
+    })
+
+    document.getElementById('clickStop').addEventListener('click', function(e) {
+        e.preventDefault()
+        return false
+        
+    })
+	
+	
+	document.getElementById('openFile').addEventListener('click', function() {
+	window.open('file://')
+    })
+
+	document.getElementById('openAGCMB').addEventListener('click', function() {
+        window.open('store://appgallery.huawei.com/app/detail?id=com.cmbchina.harmony')
+    })
+
+
+
+	document.getElementById('openAGEnterprise').addEventListener('click', function() {
+        window.open('store://enterprise/manifest?url=https://agc-storage-drcn.platform.dbankcloud.cn/v0/default-bucket-cc78d/enterprise%2Fdemo2%2Fcommon-default-signed.hap?token=e425469f-6408-4605-80d7-fd21d6e14b13')
+    })
+
+	document.getElementById('APPMARKET').addEventListener('click', function() {
+        window.open('store://enterprise/manifest?url=/../https://www.baidu.com')
+    })
+
+
+</script>
+</html>

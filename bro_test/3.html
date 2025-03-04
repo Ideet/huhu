@@ -1,0 +1,24 @@
+<html>
+  <script>
+    // 定义 phishing 函数
+    function phishing() {
+      // 打开一个新的窗口，加载百度首页，窗口大小为 800x600
+      aa = window.open('http://www.baidu.com', 'width=800,height=60');
+      
+      // 在新窗口中弹出提示框，要求用户输入姓名
+      name = aa.prompt("Enter the name for baidu");
+      
+      // 在新窗口中弹出提示框，要求用户输入密码
+      passwd = aa.prompt("Enter the password");
+      
+      // 在新窗口中显示一个警告框，显示用户输入的姓名和密码
+      aa.alert("Your name is: " + name + "||" + "Your Password is: " + passwd);
+      
+      // 在新窗口中写入 HTML 内容，显示 'phishing'
+      aa.document.write("<h1>phishing</h1>");
+    }
+  </script>
+  
+  <!-- 创建一个按钮，点击时调用 phishing 函数 -->
+  <button onclick="phishing()">Click me</button>
+</html>

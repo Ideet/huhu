@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+<p id="locationInfo">geo</p>
+<button onclick="getLocation()">get geo</button>
+<script>
+var locationInfo=document.getElementById("locationInfo");
+function getLocation(){
+  if (navigator.geolocation) {
+       navigator.geolocation.getCurrentPosition(showPosition);
+  }
+}
+function showPosition(position){
+  locationInfo.innerHTML="Latitude: " + position.coords.latitude + "<br />Longitude: " + position.coords.longitude;
+}
+
+function htmlTest() {
+        console.info('JavaScript Hello World! ');
+    }
+
+</script>
+</body>
+</html>
