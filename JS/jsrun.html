@@ -5,9 +5,15 @@
   <p id="demo"></p>
   <script>
     function callArkTS() {
+      // 调试：检查JSInterface是否存在
+      if (typeof window.JSInterface === 'undefined') {
+        document.getElementById("demo").innerText = "JSInterface is not defined!";
+        return;
+      }
+      
       // 调用HarmonyOS的JSBridge方法
       window.JSInterface.getAccountInfo()
-        .then((accountInfo: IAccountInfo | null) => {
+        .then((accountInfo) => {
           // 处理返回的Promise
           if (accountInfo) {
             // 将账户信息显示在页面上
@@ -16,7 +22,7 @@
             document.getElementById("demo").innerText = "No account information";
           }
         })
-        .catch((error: any) => {
+        .catch((error) => {
           // 处理错误
           document.getElementById("demo").innerText = `Error: ${error.message}`;
         });
