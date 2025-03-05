@@ -20,21 +20,18 @@
 			firststep();
 		}
 		
-		function callArkTs(){
-			let str = window.JsInterface.getAccountInfo();
-			.then((accountInfo) => {
-          // 处理返回的Promise
-          if (accountInfo) {
-            // 将账户信息显示在页面上
-            document.getElementById("demo").innerText = JSON.stringify(accountInfo);
-          } else {
-            document.getElementById("demo").innerText = "No account information";
-          }
-        })
-        .catch((error) => {
-          // 处理错误
-          document.getElementById("demo").innerText = `Error: ${error.message}`;
-        });
+		function callArkTs() {
+            		window.JsInterface.getAccountInfo()
+                		.then(accountInfo => {
+                    if (accountInfo) {
+                        document.getElementById("result").innerText = JSON.stringify(accountInfo);
+                    } else {
+                        document.getElementById("result").innerText = "No account information";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("result").innerText = `Error: ${error.message}`;
+                });
 	}
 	</script>	
 	<button onclick="start()" class="zoom-button">Fetch Get</button>
