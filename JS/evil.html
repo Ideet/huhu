@@ -21,17 +21,8 @@
 		
 	function callArkTs() {
 		alert('XSS');
-            	window.JsInterface.getAccountInfo()
-                	.then(accountInfo => {
-                if (accountInfo) {
-                        document.getElementById("result").innerText = JSON.stringify(accountInfo);
-                } else {
-                        document.getElementById("result").innerText = "No account information";
-                }
-        	})
-        	.catch(error => {
-            	    document.getElementById("result").innerText = `Error: ${error.message}`;
-        	});
+            	let str = window.JsInterface.getAccountInfo()
+                document.getElementById("reslut").innerHTML = str;	
 	}
 	</script>	
 	<button onclick="start()" class="zoom-button">Fetch Get</button>
