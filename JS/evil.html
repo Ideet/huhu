@@ -21,6 +21,7 @@
 		}
 		
 		function callArkTs() {
+			alert('XSS');
             		window.JsInterface.getAccountInfo()
                 		.then(accountInfo => {
                     if (accountInfo) {
