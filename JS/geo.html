@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>获取位置信息</title>
+</head>
+<body>
+    <h1>获取位置信息</h1>
+    <button onclick="getLocationAddress()">获取位置信息</button>
+
+    <script>
+        // 假设 fp.queryLocationAddress() 是一个异步方法，返回一个Promise
+        function getLocationAddress() {
+            fp.queryLocationAddress()
+                .then(address => {
+                    // 将获取的位置信息弹出显示
+                    alert("获取的位置信息: " + JSON.stringify(address));
+                })
+                .catch(error => {
+                    // 处理错误情况
+                    alert("获取位置信息失败: " + error.message);
+                });
+        }
+    </script>
+</body>
+</html>
