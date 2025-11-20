@@ -1,27 +1,25 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>获取位置信息</title>
+    <title>位置信息</title>
 </head>
 <body>
-    <h1>获取位置信息</h1>
-    <button onclick="getLocationAddress()">获取位置信息</button>
+<p id="locationInfo">位置信息</p>
+<button onclick="getLocation()">获取位置</button>
 
-    <script>
-        // 假设 fp.queryLocationAddress() 是一个异步方法，返回一个Promise
-        function getLocationAddress() {
-            fp.queryLocationAddress()
-                .then(address => {
-                    // 将获取的位置信息弹出显示
-                    alert("获取的位置信息: " + JSON.stringify(address));
-                })
-                .catch(error => {
-                    // 处理错误情况
-                    alert("获取位置信息失败: " + error.message);
-                });
+<script>
+    var locationInfo=document.getElementById("locationInfo");
+    function getLocation(){
+        if (navigator.geolocation) {
+            // 访问设备地理位置
+            navigator.geolocation.getCurrentPosition(showPosition);
         }
-    </script>
+    }
+    function showPosition(position){
+        locationInfo.innerHTML="Latitude: " + position.coords.latitude + "<br />Longitude: " + position.coords.longitude;
+    }
+</script>
 </body>
 </html>
