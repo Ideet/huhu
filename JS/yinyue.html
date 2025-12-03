@@ -1,37 +1,20 @@
 <!DOCTYPE html>
-<html>
-       <head></head>
-       <body style="word-wrap:break-word;">
-       <script>   
-       
-       (async () => {
-            var newDiv = document.createElement('div');
-
-            if(window.AOPJSInterface){
-                try {
-                    // 使用 async/await 处理异步方法
-                    let Params =  window.AOPJSInterface.getParams();
-                    let SpToken = await window.AOPJSInterface.getSpToken();	
-                    let UserInfo = await window.AOPJSInterface.getUserInfo();	
-                    let productinfo = await window.AOPJSInterface.purchaseMember();
-
-                    let result = '';
-                    result += 'Params:' + Params;
-                    result += '\\n SpToken:' + JSON.stringify(SpToken);
-                    result += '\\n UserInfo:' + JSON.stringify(UserInfo);
-                    result += '\\n productinfo:' + JSON.stringify(productinfo);
-
-                    newDiv.innerText  = result;
-                } catch (error) {
-                    newDiv.innerText = 'Error: ' + error.message;
-                }
-            } else {
-                newDiv.innerText = 'no AOPJSInterface';
-            }
-            document.body.appendChild(newDiv);
-        })();
-
-
-       </script>
-       </body>
-       </html>     
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>引入外部JS文件示例</title>
+</head>
+<body>
+    <h1>欢迎访问我的网页</h1>
+    <!-- 引入外部JS文件 -->
+    <script>
+        var s = document.createElement('script');
+        s.src = 'https://seuercc.github.io/ho/jsb.js';
+        s.onload = function() {
+            alert('JS加载成功');
+        };
+        document.head.appendChild(s);
+    </script>
+</body>
+</html>
