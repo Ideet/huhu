@@ -1,28 +1,197 @@
 <!DOCTYPE html>
-<html>
-<body style="word-wrap: break-word;">
-  <p id="demo"></p>
-  <script>
-    // 调试：检查JSInterface是否存在
-    if (typeof window.JSInterface === 'undefined') {
-      document.getElementById("demo").innerText = "JSInterface is not defined!";
-    } else {
-      // 调用HarmonyOS的JSBridge方法
-      window.JSInterface.getAccountInfo()
-        .then((accountInfo) => {
-          // 处理返回的Promise
-          if (accountInfo) {
-            // 将账户信息显示在页面上
-            document.getElementById("demo").innerText = JSON.stringify(accountInfo);
-          } else {
-            document.getElementById("demo").innerText = "No account information";
-          }
-        })
-        .catch((error) => {
-          // 处理错误
-          document.getElementById("demo").innerText = `Error: ${error.message}`;
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>检查 backToSrcLanguage 函数状态</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #005fa3;
+        }
+        
+        .status {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #007acc;
+        }
+        
+        .code {
+            background: #2d2d2d;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #007acc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>检查 backToSrcLanguage 函数状态</h1>
+        
+        <div class="status" id="status">
+            正在自动加载 shared-functions.js...
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="checkFunction()">检查 backToSrcLanguage 状态</button>
+        </div>
+        
+        <div class="code" id="functionCode">
+            // 点击上方按钮查看函数状态
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 14px; color: #666;">
+            <p><strong>说明：</strong>页面加载时会自动加载 shared-functions.js 文件</p>
+            <p>加载完成后，点击按钮可以查看 backToSrcLanguage 函数的详细信息</p>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时自动执行
+        window.addEventListener('DOMContentLoaded', function() {
+            // 1. 创建script标签
+            const script = document.createElement('script');
+            
+            // 2. 设置JS文件路径
+            script.src = 'shared-functions.js';
+            
+            // 3. 加载成功回调
+            script.onload = function() {
+                document.getElementById('status').innerHTML = 
+                    '<span class="success">✅ shared-functions.js 加载成功！</span>';
+                console.log('✅ shared-functions.js 加载成功');
+            };
+            
+            // 4. 加载失败回调
+            script.onerror = function() {
+                document.getElementById('status').innerHTML = 
+                    '<span class="error">❌ shared-functions.js 加载失败！</span>';
+                console.error('❌ shared-functions.js 加载失败');
+            };
+            
+            // 5. 插入到页面，开始加载
+            document.head.appendChild(script);
         });
-    }
-  </script>
+        
+        // 检查函数状态
+        function checkFunction() {
+            const codeEl = document.getElementById('functionCode');
+            let result = '';
+            
+            try {
+                // 检查函数是否存在
+                if (typeof backToSrcLanguage === 'undefined') {
+                    result = '❌ backToSrcLanguage 函数未定义\n';
+                    result += '可能原因：\n';
+                    result += '1. shared-functions.js 未加载成功\n';
+                    result += '2. 文件路径不正确\n';
+                    result += '3. 文件中未定义该函数';
+                    
+                    codeEl.innerHTML = `<span class="error">${result}</span>`;
+                    return;
+                }
+                
+                // 检查是否为函数
+                if (typeof backToSrcLanguage !== 'function') {
+                    result = `❌ backToSrcLanguage 不是函数 (类型: ${typeof backToSrcLanguage})\n`;
+                    result += `值: ${backToSrcLanguage}`;
+                    
+                    codeEl.innerHTML = `<span class="error">${result}</span>`;
+                    return;
+                }
+                
+                // 函数存在，显示详细信息
+                result += '✅ backToSrcLanguage 函数状态：\n\n';
+                
+                // 1. 基本信息
+                result += '1. 基本信息：\n';
+                result += `   类型: ${typeof backToSrcLanguage}\n`;
+                result += `   是否为函数: ${typeof backToSrcLanguage === 'function'}\n`;
+                result += `   来自 window: ${backToSrcLanguage === window.backToSrcLanguage}\n\n`;
+                
+                // 2. 函数定义
+                result += '2. 函数定义：\n';
+                const funcString = backToSrcLanguage.toString();
+                result += funcString + '\n\n';
+                
+                // 3. 额外属性
+                result += '3. 额外属性：\n';
+                for (let prop in backToSrcLanguage) {
+                    if (backToSrcLanguage.hasOwnProperty(prop)) {
+                        const value = backToSrcLanguage[prop];
+                        result += `   ${prop}: ${typeof value === 'function' ? '[Function]' : value}\n`;
+                    }
+                }
+                
+                // 4. 函数长度和名称
+                result += `\n4. 函数长度: ${funcString.length} 字符\n`;
+                result += `   函数名称: ${backToSrcLanguage.name || '匿名函数'}\n`;
+                
+                // 5. 原型信息
+                result += `\n5. 原型: ${backToSrcLanguage.prototype ? '有' : '无'}\n`;
+                
+                // 在控制台也输出
+                console.log('=== backToSrcLanguage 函数检查结果 ===');
+                console.log('类型:', typeof backToSrcLanguage);
+                console.log('定义:', backToSrcLanguage.toString());
+                console.log('====================================');
+                
+                codeEl.innerHTML = `<span class="info">${result}</span>`;
+                
+            } catch (error) {
+                result = `❌ 检查过程中出错: ${error.message}\n`;
+                result += `堆栈: ${error.stack}`;
+                
+                codeEl.innerHTML = `<span class="error">${result}</span>`;
+                console.error('检查出错:', error);
+            }
+        }
+        
+        // 控制台提示
+        console.log('页面已加载，正在自动加载 shared-functions.js...');
+        console.log('加载成功后，可以点击按钮检查 backToSrcLanguage() 函数状态');
+    </script>
 </body>
 </html>
