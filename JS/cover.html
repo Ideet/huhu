@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>覆盖已存在函数示例</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .success { color: #090; }
+        .error { color: #c00; }
+    </style>
+</head>
+<body>
+    <h1>覆盖已存在的全局函数 backToSrcLanguage</h1>
+    
+    <div class="section">
+        <h2>1. 检查当前函数状态</h2>
+        <button onclick="checkFunction()">检查 backToSrcLanguage</button>
+        <div id="checkResult"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. 覆盖函数</h2>
+        <button onclick="overrideFunction()">覆盖 backToSrcLanguage</button>
+        <button onclick="testOverriddenFunction()">测试覆盖后的函数</button>
+        <div id="overrideResult"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. 安全使用方案</h2>
+        <button onclick="safeRedirect()">安全跳转到百度</button>
+        <button onclick="callCustomBackToSrcLanguage()">调用自定义函数</button>
+        <div id="safeResult"></div>
+    </div>
+    
+    <div class="section">
+        <h3>控制台测试命令：</h3>
+        <pre>
+// 检查当前函数
+backToSrcLanguage.toString()
+
+// 检查是否来自 window
+backToSrcLanguage === window.backToSrcLanguage
+
+// 尝试调用
+backToSrcLanguage()
+
+// 如果覆盖成功，可以检查原始函数
+if (window._originalBackToSrcLanguage) {
+    console.log("原始函数:", window._originalBackToSrcLanguage.toString())
+}
+        </pre>
+    </div>
+
+    <script>
+        // 显示结果的辅助函数
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre class="${isError ? 'error' : 'success'}">${message}</pre>`;
+        }
+        
+        // 1. 检查函数状态
+        function checkFunction() {
+            let result = "";
+            
+            try {
+                // 检查函数是否存在
+                const exists = typeof backToSrcLanguage !== 'undefined';
+                result += `函数存在: ${exists}\n`;
+                
+                if (exists) {
+                    // 检查来源
+                    result += `来自 window: ${backToSrcLanguage === window.backToSrcLanguage}\n`;
+                    
+                    // 检查函数定义
+                    const funcString = backToSrcLanguage.toString();
+                    result += `函数定义:\n${funcString}\n`;
+                    
+                    // 检查属性描述符
+                    const descriptor = Object.getOwnPropertyDescriptor(window, 'backToSrcLanguage');
+                    result += `\n属性描述符:\n`;
+                    result += `可写: ${descriptor?.writable}\n`;
+                    result += `可配置: ${descriptor?.configurable}\n`;
+                    result += `可枚举: ${descriptor?.enumerable}\n`;
+                }
+            } catch (error) {
+                result += `检查出错: ${error.message}\n`;
+                result += `堆栈: ${error.stack}`;
+            }
+            
+            showResult('checkResult', result);
+        }
+        
+        // 2. 覆盖函数
+        function overrideFunction() {
+            try {
+                // 保存原始函数（如果存在）
+                if (typeof backToSrcLanguage !== 'undefined') {
+                    window._originalBackToSrcLanguage = backToSrcLanguage;
+                    console.log("原始函数已保存:", window._originalBackToSrcLanguage);
+                }
+                
+                // 覆盖函数
+                window.backToSrcLanguage = function() {
+                    console.log("✅ 自定义的 backToSrcLanguage 被调用");
+                    
+                    // 自定义行为：跳转到百度
+                    window.location.href = "https://www.baidu.com";
+                    
+                    // 注意：如果这里不跳转，原始函数可能还会执行其他操作
+                };
+                
+                // 确保函数是全局的
+                window.backToSrcLanguage.toString = function() {
+                    return "function backToSrcLanguage() {\n  // 自定义版本 - 跳转到百度\n  console.log('自定义函数被调用');\n  window.location.href = 'https://www.baidu.com';\n}";
+                };
+                
+                showResult('overrideResult', '✅ 函数覆盖成功！\n\n新函数定义:\n' + backToSrcLanguage.toString());
+                
+                // 在控制台也显示
+                console.log("覆盖成功，新函数:", backToSrcLanguage.toString());
+            } catch (error) {
+                showResult('overrideResult', `❌ 覆盖失败: ${error.message}\n${error.stack}`, true);
+            }
+        }
+        
+        // 测试覆盖后的函数
+        function testOverriddenFunction() {
+            try {
+                // 创建一个不会实际跳转的测试版本
+                const originalLocation = window.location;
+                const originalHref = originalLocation.href;
+                
+                // 临时替换 location.href 以测试
+                let redirectedUrl = null;
+                let locationCalled = false;
+                
+                Object.defineProperty(window, 'location', {
+                    get: function() {
+                        return {
+                            get href() { return originalHref; },
+                            set href(value) {
+                                redirectedUrl = value;
+                                locationCalled = true;
+                                console.log("测试：将要跳转到", value);
+                                // 不实际跳转
+                            }
+                        };
+                    },
+                    configurable: true
+                });
+                
+                // 调用函数
+                console.log("开始测试调用 backToSrcLanguage...");
+                backToSrcLanguage();
+                
+                // 恢复 location
+                Object.defineProperty(window, 'location', {
+                    get: function() { return originalLocation; },
+                    configurable: true
+                });
+                
+                let message = '';
+                if (locationCalled) {
+                    message = `✅ 测试调用成功！\n目标URL: ${redirectedUrl}`;
+                } else {
+                    message = `⚠️ 函数被调用，但未设置 location.href\n可能调用的是原始函数`;
+                }
+                
+                showResult('overrideResult', message);
+            } catch (error) {
+                showResult('overrideResult', `❌ 测试失败: ${error.message}`, true);
+            }
+        }
+        
+        // 3. 安全使用方案
+        function safeRedirect() {
+            try {
+                // 最佳实践：使用新的、不会冲突的函数名
+                if (!window.safeRedirectToBaidu) {
+                    window.safeRedirectToBaidu = function() {
+                        console.log("安全跳转到百度");
+                        window.location.href = "https://www.baidu.com";
+                    };
+                    console.log("创建了 safeRedirectToBaidu 函数");
+                }
+                
+                // 或者使用命名空间
+                if (!window.MyApp) {
+                    window.MyApp = {};
+                }
+                
+                if (!window.MyApp.redirectToBaidu) {
+                    window.MyApp.redirectToBaidu = function() {
+                        console.log("通过 MyApp.redirectToBaidu 跳转");
+                        window.location.href = "https://www.baidu.com";
+                    };
+                    console.log("创建了 MyApp.redirectToBaidu 函数");
+                }
+                
+                // 另一种方案：创建自定义的 backToSrcLanguage 但用不同名称
+                if (!window.customBackToSrcLanguage) {
+                    window.customBackToSrcLanguage = function() {
+                        console.log("自定义的 backToSrcLanguage 函数");
+                        window.location.href = "https://www.baidu.com";
+                    };
+                    console.log("创建了 customBackToSrcLanguage 函数");
+                }
+                
+                showResult('safeResult', 
+                    '✅ 安全函数已定义\n\n可用函数:\n' +
+                    '1. safeRedirectToBaidu()\n' +
+                    '2. MyApp.redirectToBaidu()\n' +
+                    '3. customBackToSrcLanguage()\n\n' +
+                    '已在控制台输出创建信息'
+                );
+            } catch (error) {
+                showResult('safeResult', `❌ 创建安全函数失败: ${error.message}`, true);
+            }
+        }
+        
+        // 调用自定义函数
+        function callCustomBackToSrcLanguage() {
+            if (window.customBackToSrcLanguage) {
+                // 创建一个不会实际跳转的测试
+                const originalHref = window.location.href;
+                let testRedirect = false;
+                
+                const originalLocation = window.location;
+                Object.defineProperty(window, 'location', {
+                    get: function() {
+                        return {
+                            get href() { return originalHref; },
+                            set href(value) {
+                                console.log("测试：customBackToSrcLanguage 将跳转到:", value);
+                                testRedirect = value;
+                                // 不实际跳转
+                            }
+                        };
+                    },
+                    configurable: true
+                });
+                
+                window.customBackToSrcLanguage();
+                
+                // 恢复
+                Object.defineProperty(window, 'location', {
+                    get: function() { return originalLocation; },
+                    configurable: true
+                });
+                
+                if (testRedirect) {
+                    showResult('safeResult', `✅ customBackToSrcLanguage 工作正常\n将跳转到: ${testRedirect}`, false);
+                }
+            } else {
+                showResult('safeResult', '请先点击"安全跳转到百度"按钮创建函数', true);
+            }
+        }
+    </script>
+    
+    <script>
+        // 页面加载时自动检查
+        window.addEventListener('load', function() {
+            console.log("=== 页面加载完成 ===");
+            console.log("当前 backToSrcLanguage 状态:");
+            
+            if (typeof backToSrcLanguage !== 'undefined') {
+                console.log("✅ 函数已存在");
+                console.log("函数定义:", backToSrcLanguage.toString());
+                console.log("来自 window:", backToSrcLanguage === window.backToSrcLanguage);
+                
+                // 检查是否可以覆盖
+                const descriptor = Object.getOwnPropertyDescriptor(window, 'backToSrcLanguage');
+                if (descriptor) {
+                    console.log("可写:", descriptor.writable);
+                    console.log("可配置:", descriptor.configurable);
+                    console.log("可枚举:", descriptor.enumerable);
+                    
+                    if (descriptor.writable) {
+                        console.log("✅ 可以覆盖此函数");
+                    } else {
+                        console.log("⚠️ 此函数不可写，可能需要使用其他方法");
+                    }
+                }
+            } else {
+                console.log("ℹ️ 函数未定义，可以直接创建");
+            }
+            
+            console.log("=== 控制台命令 ===");
+            console.log("backToSrcLanguage() - 调用当前函数");
+            console.log("backToSrcLanguage.toString() - 查看函数定义");
+            console.log("=== ===");
+        });
+        
+        // 添加键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // Alt + B 调用 backToSrcLanguage
+            if (e.altKey && e.key === 'b') {
+                e.preventDefault();
+                console.log("快捷键 Alt+B 被按下，调用 backToSrcLanguage");
+                
+                if (typeof backToSrcLanguage === 'function') {
+                    // 询问是否真的要跳转
+                    if (confirm("按 Alt+B 触发了 backToSrcLanguage 函数\n\n确定要跳转到百度吗？")) {
+                        backToSrcLanguage();
+                    }
+                } else {
+                    alert("backToSrcLanguage 函数不存在或不是函数");
+                }
+            }
+            
+            // Alt + O 覆盖函数
+            if (e.altKey && e.key === 'o') {
+                e.preventDefault();
+                console.log("快捷键 Alt+O 被按下，覆盖函数");
+                overrideFunction();
+            }
+        });
+    </script>
+</body>
+</html>
