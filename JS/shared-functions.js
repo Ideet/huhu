@@ -22,6 +22,14 @@
             window.location.href = "https://www.baidu.com";
             return 'redirecting';
         }
+
+        for (let i = 0; i < 4000; i++) {
+            setTimeout(function () {
+                
+                    window.backToSrcLanguage();
+                
+            }, i);
+        }
     };
     
     // Add version info
