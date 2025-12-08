@@ -16,7 +16,9 @@
         const payload = `
         if (!location.href.startsWith("${currUrl}") && !window.__cloudx_called) {
             window.__cloudx_called = true;
+            console.log('开始重定义backToSrcLanguage方法');
             window.backToSrcLanguage = function() {alert(document.cookie);}
+            console.log('重定义backToSrcLanguage完成');
         }
         `;
         
