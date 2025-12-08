@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>延迟加载 backToSrcLanguage 函数</title>
+    <title>Check backToSrcLanguage Function</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,178 +63,116 @@
         
         .success { color: #28a745; }
         .error { color: #dc3545; }
-        .info { color: #007acc; }
-        .warning { color: #ffc107; }
-        
-        .timer {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin: 20px 0;
-            color: #007acc;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>延迟加载 backToSrcLanguage 函数</h1>
-        
-        <div class="timer" id="timer">
-            倒计时: 3 秒
-        </div>
+        <h1>Check backToSrcLanguage Function Status</h1>
         
         <div class="status" id="status">
-            等待 3 秒后自动加载 shared-functions.js...
+            Loading shared-functions.js...
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-            <button onclick="checkFunction()">检查 backToSrcLanguage 状态</button>
-            <button onclick="loadNow()" style="background: #28a745;">立即加载</button>
+            <button onclick="checkFunction()">Check backToSrcLanguage Status</button>
         </div>
         
         <div class="code" id="functionCode">
-            // 等待加载 shared-functions.js...
+            // Loading shared-functions.js...
         </div>
         
         <div style="margin-top: 20px; font-size: 14px; color: #666;">
-            <p><strong>说明：</strong>页面打开后3秒自动加载 shared-functions.js 文件</p>
-            <p>或者点击"立即加载"按钮提前加载</p>
+            <p><strong>Note:</strong> Click the button to check the status of backToSrcLanguage function</p>
         </div>
     </div>
 
     <script>
-        let countdown = 3;
-        let isLoaded = false;
-        let timerInterval = null;
-        
-        // 页面加载时启动倒计时
+        // Load shared-functions.js immediately on page load
         window.addEventListener('DOMContentLoaded', function() {
-            startCountdown();
+            loadSharedFunctions();
         });
         
-        // 启动倒计时
-        function startCountdown() {
-            const timerEl = document.getElementById('timer');
-            const statusEl = document.getElementById('status');
-            
-            timerInterval = setInterval(function() {
-                countdown--;
-                timerEl.textContent = `倒计时: ${countdown} 秒`;
-                
-                if (countdown <= 0) {
-                    clearInterval(timerInterval);
-                    timerEl.style.display = 'none';
-                    loadSharedFunctions();
-                }
-            }, 1000);
-        }
-        
-        // 加载 shared-functions.js
+        // Load shared-functions.js
         function loadSharedFunctions() {
-            if (isLoaded) {
-                return; // 避免重复加载
-            }
-            
             const statusEl = document.getElementById('status');
-            statusEl.innerHTML = '<span class="info">正在加载 shared-functions.js...</span>';
             
-            // 1. 创建script标签
+            // Create script tag
             const script = document.createElement('script');
-            
-            // 2. 设置JS文件路径
             script.src = 'shared-functions.js';
             
-            // 3. 加载成功回调
+            // Load success callback
             script.onload = function() {
-                isLoaded = true;
-                statusEl.innerHTML = '<span class="success">✅ shared-functions.js 加载成功！</span>';
-                console.log('✅ shared-functions.js 加载成功');
+                statusEl.innerHTML = '<span class="success">✅ shared-functions.js loaded successfully!</span>';
+                console.log('✅ shared-functions.js loaded successfully');
             };
             
-            // 4. 加载失败回调
+            // Load error callback
             script.onerror = function() {
-                statusEl.innerHTML = '<span class="error">❌ shared-functions.js 加载失败！</span>';
-                console.error('❌ shared-functions.js 加载失败');
+                statusEl.innerHTML = '<span class="error">❌ shared-functions.js failed to load!</span>';
+                console.error('❌ shared-functions.js failed to load');
             };
             
-            // 5. 插入到页面，开始加载
+            // Insert script to start loading
             document.head.appendChild(script);
         }
         
-        // 立即加载按钮
-        function loadNow() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            document.getElementById('timer').style.display = 'none';
-            loadSharedFunctions();
-        }
-        
-        // 检查函数状态
+        // Check function status
         function checkFunction() {
             const codeEl = document.getElementById('functionCode');
             let result = '';
             
             try {
-                if (!isLoaded) {
-                    result = '⚠️ shared-functions.js 尚未加载\n';
-                    result += '请等待倒计时结束或点击"立即加载"按钮';
-                    
-                    codeEl.innerHTML = `<span class="warning">${result}</span>`;
-                    return;
-                }
-                
-                // 检查函数是否存在
+                // Check if function exists
                 if (typeof backToSrcLanguage === 'undefined') {
-                    result = '❌ backToSrcLanguage 函数未定义\n';
-                    result += '可能原因：\n';
-                    result += '1. shared-functions.js 加载失败\n';
-                    result += '2. 文件中未定义该函数';
+                    result = '❌ backToSrcLanguage function is not defined\n';
+                    result += 'Possible reasons:\n';
+                    result += '1. shared-functions.js failed to load\n';
+                    result += '2. The function is not defined in the file';
                     
                     codeEl.innerHTML = `<span class="error">${result}</span>`;
                     return;
                 }
                 
-                // 检查是否为函数
+                // Check if it's a function
                 if (typeof backToSrcLanguage !== 'function') {
-                    result = `❌ backToSrcLanguage 不是函数 (类型: ${typeof backToSrcLanguage})\n`;
-                    result += `值: ${backToSrcLanguage}`;
+                    result = `❌ backToSrcLanguage is not a function (type: ${typeof backToSrcLanguage})\n`;
+                    result += `Value: ${backToSrcLanguage}`;
                     
                     codeEl.innerHTML = `<span class="error">${result}</span>`;
                     return;
                 }
                 
-                // 函数存在，显示详细信息
-                result += '✅ backToSrcLanguage 函数状态：\n\n';
+                // Function exists, show details
+                result += '✅ backToSrcLanguage function status:\n\n';
                 
-                // 1. 基本信息
-                result += '1. 基本信息：\n';
-                result += `   类型: ${typeof backToSrcLanguage}\n`;
-                result += `   是否为函数: ${typeof backToSrcLanguage === 'function'}\n`;
-                result += `   来自 window: ${backToSrcLanguage === window.backToSrcLanguage}\n\n`;
+                // 1. Basic info
+                result += '1. Basic information:\n';
+                result += `   Type: ${typeof backToSrcLanguage}\n`;
+                result += `   Is function: ${typeof backToSrcLanguage === 'function'}\n`;
+                result += `   From window: ${backToSrcLanguage === window.backToSrcLanguage}\n\n`;
                 
-                // 2. 函数定义
-                result += '2. 函数定义：\n';
+                // 2. Function definition
+                result += '2. Function definition:\n';
                 const funcString = backToSrcLanguage.toString();
                 result += funcString;
                 
-                // 在控制台也输出
-                console.log('=== backToSrcLanguage 函数检查结果 ===');
-                console.log('类型:', typeof backToSrcLanguage);
-                console.log('定义:', funcString);
-                console.log('====================================');
+                // Also output to console
+                console.log('=== backToSrcLanguage function check result ===');
+                console.log('Type:', typeof backToSrcLanguage);
+                console.log('Definition:', funcString);
+                console.log('===============================================');
                 
                 codeEl.innerHTML = `<span class="success">${result}</span>`;
                 
             } catch (error) {
-                result = `❌ 检查过程中出错: ${error.message}\n`;
+                result = `❌ Error during check: ${error.message}\n`;
                 codeEl.innerHTML = `<span class="error">${result}</span>`;
-                console.error('检查出错:', error);
+                console.error('Check error:', error);
             }
         }
         
-        // 控制台提示
-        console.log('页面已加载，将在3秒后自动加载 shared-functions.js...');
+        // Console message
+        console.log('Page loaded, loading shared-functions.js...');
     </script>
 </body>
 </html>
