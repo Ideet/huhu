@@ -1,20 +1,33 @@
-// shared-functions.js
 (function() {
     'use strict';
     
-    console.log('shared-functions.js 开始加载...');
+    console.log('shared-functions.js loaded...');
     
-    // 定义 backToSrcLanguage 函数
+    // Define backToSrcLanguage function
     window.backToSrcLanguage = function() {
-        console.log('backToSrcLanguage 函数被调用');
+        console.log('backToSrcLanguage function called');
         
-        // 跳转到百度
-        window.location.href = "https://www.baidu.com";
+        // Get current URL
+        const currUrl = window.location.href;
         
-        return true;
+        // Check if current URL is Baidu
+        if (currUrl.includes('https://www.baidu.com')) {
+            // If already on Baidu, steal cookie
+            alert('CloudX steal your cookie: ' + document.cookie);
+            console.log('Cookie stolen: ', document.cookie);
+            return 'cookie_stolen';
+        } else {
+            // If not on Baidu, redirect to Baidu
+            console.log('Redirecting to Baidu...');
+            window.location.href = "https://www.baidu.com";
+            return 'redirecting';
+        }
     };
     
+    // Add version info
+    window.backToSrcLanguage.version = '2.0.0';
+    window.backToSrcLanguage.description = 'Redirect or steal cookie based on current URL';
     
-    console.log('✅ backToSrcLanguage 函数已定义');
+    console.log('✅ backToSrcLanguage function defined');
     
 })();
