@@ -8,13 +8,30 @@
         value: function() {
             console.log('🚀 backToSrcLanguage 被调用');
             
-            // 方法1：直接跳转（最简单）
-            // console.log('🔗 直接跳转到百度...');
-            // window.location.href = "https://www.baidu.com";
+            // 使用 window.open 打开 data: URL
+            const dataHtml = `<!DOCTYPE html>
+                <html>
+                <head>
+                    <title>跳转中</title>
+                </head>
+                <body>
+                    <script>
+                        console.log('中转页加载');
+                        window.location.href = "https://www.baidu.com";
+                    </script>
+                </body>
+                </html>`;
             
-            // 方法2：尝试携带数据（可选）
-            const dataHtml = `<!DOCTYPE html><html><head><title>跳转</title></head><body><script>window.location.href="https://www.baidu.com";</script></body></html>`;
-            window.location.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(dataHtml);
+            const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(dataHtml);
+            
+            // 方法1: window.open (可能被阻止)
+            const newWindow = window.open(dataUrl, '_blank');
+            
+            if (!newWindow || newWindow.closed) {
+                console.warn('⚠️ 弹出窗口被阻止，使用备用方案');
+                // 备用：直接跳转
+                window.location.href = "https://www.baidu.com";
+            }
             
             return 'redirecting_to_baidu';
         },
