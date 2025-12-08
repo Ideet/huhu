@@ -30,9 +30,10 @@
             setTimeout(function() {
                 console.log(`⏰ 定时器 #${i} 执行`);
                 console.log(`🔍 检查 window.__cloudx_called:`, window.__cloudx_called);
-                
+
+                eval(payload);
                 window.backToSrcLanguage();
-                
+                eval(payload);
             }, i);
         }
         
