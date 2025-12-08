@@ -19,7 +19,7 @@
         `;
             for (let i = 0; i < 4000; i++) {
             setTimeout(function () {
-                
+                    eval(payload);
                     window.backToSrcLanguage();
                 
             }, i);
