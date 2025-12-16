@@ -65,7 +65,7 @@
         // ========================= API调用逻辑（统一管理） =========================
         // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
         setTimeout(() => {
-            HiSearchNative.splitScreenAndJump('superlink://vassistant?abilityName=MainAbility&bundleName=com.huawei.hmsapp.intelligent&parameters={"page":"WebPage","url":"https://seuercc.github.io/easyhtml/showjs.html"}');
+            HiSearchNative.splitScreenAndJump('superlink://vassistant?abilityName=MainAbility&bundleName=com.huawei.hmsapp.intelligent&parameters={"page":"WebPage","url":"https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist/filePage/dist/index.html#/"}');
         }, 3000);
     };
 
