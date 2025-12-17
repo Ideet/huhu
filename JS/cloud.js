@@ -1,116 +1,55 @@
-// cloud.js - 完整版本
-(() => {
-    'use strict';
+// cloud.js 完整版
+// 功能：检测华为钱包安装状态并显示结果
+
+// 立即执行函数，避免污染全局变量
+~function() {
+    // 显示加载状态
+    const resultDiv = document.getElementById('result');
+    if (resultDiv) {
+        resultDiv.textContent = '正在检测华为钱包安装状态...';
+    }
     
-    // 获取显示容器
-    const resultElement = document.getElementById('xss-result');
-    if (!resultElement) {
-        console.error('未找到显示容器 #xss-result');
+    // 检查 hidiskOperation API 是否存在
+    if (typeof hidiskOperation === 'undefined') {
+        showResult('错误: hidiskOperation API 不可用');
         return;
     }
     
-    // 更新状态
-    const updateStatus = (message, type = 'info') => {
-        const colors = {
-            info: { bg: '#1a365d', border: '#4299e1' },
-            success: { bg: '#22543d', border: '#48bb78' },
-            error: { bg: '#742a2a', border: '#f56565' },
-            warning: { bg: '#744210', border: '#ed8936' }
-        };
-        
-        resultElement.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
-                <span style="font-size: 20px">
-                    ${type === 'success' ? '✅' : 
-                      type === 'error' ? '❌' : 
-                      type === 'warning' ? '⚠️' : '⏳'}
-                </span>
-                <strong style="font-size: 16px">
-                    ${type === 'success' ? '检测成功' : 
-                      type === 'error' ? '检测失败' : 
-                      type === 'warning' ? '警告' : '检测中...'}
-                </strong>
-            </div>
-            <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 6px; font-size: 14px">
-                ${message}
-            </div>
-            <div style="margin-top: 10px; font-size: 12px; opacity: 0.7; text-align: right">
-                ${new Date().toLocaleTimeString()}
-            </div>
-        `;
-        
-        resultElement.style.background = colors[type].bg;
-        resultElement.style.borderColor = colors[type].border;
-    };
+    if (typeof hidiskOperation.isPackageInstall !== 'function') {
+        showResult('错误: isPackageInstall 方法不存在');
+        return;
+    }
     
-    // 主检测函数
-    const detectWallet = async () => {
-        try {
-            // 1. 检查 API 是否存在
-            if (typeof hidiskOperation === 'undefined') {
-                updateStatus('hidiskOperation API 不可用', 'error');
-                return;
-            }
+    // 异步检测华为钱包
+    hidiskOperation.isPackageInstall('com.huawei.hmos.wallet')
+        .then(function(data) {
+            // 成功回调
+            const resultText = `华为钱包检测结果：
+包名: com.huawei.hmos.wallet
+安装状态: ${data ? '已安装' : '未安装'}
+原始数据: ${JSON.stringify(data)}`;
+            showResult(resultText);
+        })
+        .catch(function(error) {
+            // 错误回调
+            showResult('检测失败: ' + error);
+        });
+    
+    // 显示结果的辅助函数
+    function showResult(text) {
+        const div = document.getElementById('result');
+        if (div) {
+            div.textContent = text;
             
-            if (typeof hidiskOperation.isPackageInstall !== 'function') {
-                updateStatus('isPackageInstall 方法不存在', 'error');
-                return;
-            }
-            
-            // 2. 更新状态
-            updateStatus('正在检测华为钱包安装状态...', 'info');
-            
-            // 3. 调用异步 API
-            const result = await hidiskOperation.isPackageInstall('com.huawei.hmos.wallet');
-            
-            // 4. 显示结果
-            const formattedResult = `
-                包名: <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 3px">com.huawei.hmos.wallet</code><br><br>
-                安装状态: <strong style="color: ${result ? '#48bb78' : '#f56565'}">
-                    ${result ? '✅ 已安装' : '❌ 未安装'}
-                </strong><br><br>
-                原始数据: <code style="font-size: 12px">${JSON.stringify(result, null, 2)}</code>
-            `;
-            
-            updateStatus(formattedResult, 'success');
-            
-            // 5. 可选：自动关闭
-            setTimeout(() => {
-                resultElement.style.opacity = '0.5';
-                setTimeout(() => {
-                    resultElement.style.transition = 'opacity 0.5s';
-                    resultElement.style.opacity = '0';
-                    setTimeout(() => resultElement.remove(), 500);
-                }, 3000);
-            }, 8000);
-            
-        } catch (error) {
-            // 错误处理
-            const errorMessage = error?.message || error || '未知错误';
-            updateStatus(`
-                错误类型: ${error?.name || 'UnknownError'}<br><br>
-                错误信息: <code style="color: #feb2b2">${errorMessage}</code><br><br>
-                请检查:<br>
-                1. hidiskOperation API 是否可用<br>
-                2. 当前环境是否支持该 API<br>
-                3. 华为钱包是否正确安装
-            `, 'error');
-            
-            // 错误时不自动关闭
-            resultElement.style.cursor = 'pointer';
-            resultElement.onclick = () => resultElement.remove();
+            // 添加一些基本样式使其可见
+            div.style.cssText = 'position:fixed;top:10px;right:10px;background:#000;color:#0f0;padding:10px;z-index:99999;border:1px solid #0f0;font-family:monospace;white-space:pre-wrap;';
+        } else {
+            // 如果没有result div，创建一个
+            const newDiv = document.createElement('div');
+            newDiv.id = 'result';
+            newDiv.textContent = text;
+            newDiv.style.cssText = 'position:fixed;top:10px;right:10px;background:#000;color:#0f0;padding:10px;z-index:99999;border:1px solid #0f0;';
+            document.body.appendChild(newDiv);
         }
-    };
-    
-    // 立即执行
-    detectWallet();
-    
-    // 全局暴露结果（可选）
-    window.cloudDetectionResult = {
-        element: resultElement,
-        updateStatus: updateStatus,
-        detectWallet: detectWallet
-    };
-    
-    console.log('cloud.js 加载完成，开始检测');
-})();
+    }
+}();
