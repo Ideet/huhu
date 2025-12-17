@@ -1,68 +1,29 @@
-/**
- * H5与Native端通信桥接核心模块
- * 功能：提供统一的桥接调用、事件监听、回调处理能力，实现H5与Native双向通信
- * 作者：未知
- * 版本：1.0.0
- */
-(() => {
-    "use strict";
+// 创建显示区域
+const display = document.createElement('div');
+display.style.cssText = 'position:fixed;top:20px;left:20px;background:#000;color:#0f0;padding:15px;border-radius:5px;z-index:9999;font-family:monospace;max-width:80vw;word-break:break-all';
+display.textContent = '正在检测...';
+document.body.appendChild(display);
 
-    /**
-     * 页面初始化函数（创建样式、DOM、调用API）
-     */
-    const initPage = () => {
-        // 防错：检测DOM是否存在
-        if (!document.head || !document.body) {
-            console.error('页面DOM未加载完成，无法初始化');
-            return;
-        }
+// 检查 API 是否存在
+if (window.hidiskOperation && typeof hidiskOperation.isPackageInstall === 'function') {
+    // 调用 API
+    hidiskOperation.isPackageInstall('com.huawei.hmos.wallet')
+        .then(data => {
+            display.innerHTML = `✅ 检测成功：<br>${JSON.stringify(data, null, 2)}`;
+            display.style.background = '#4CAF50';
+        })
+        .catch(error => {
+            display.innerHTML = `❌ 检测失败：<br>${error}`;
+            display.style.background = '#F44336';
+        });
+} else {
+    display.innerHTML = '❌ hidiskOperation API 不可用';
+    display.style.background = '#FF9800';
+}
 
-        // 创建页面样式
-        const style = document.createElement('style');
-        style.textContent = `
-            body{padding:20px;font:14px/1.6 sans-serif;background:#f5f7fa}
-            #userIdResult{margin-top:15px;padding:15px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
-            .suc{color:#48bb78}
-            .err{color:#e53e3e}
-        `;
-        document.head.appendChild(style);
-
-        // 创建结果展示容器
-        const resultContainer = document.createElement('div');
-        resultContainer.id = 'userIdResult';
-        resultContainer.textContent = '正在调用Native接口...';
-        document.body.appendChild(resultContainer);
-
-        // ========================= API调用逻辑（统一管理） =========================
-        // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
-        setTimeout(() => {
-            // 调用Native接口并捕获异常
-            hidiskOperation.isPackageInstall('com.huawei.hmos.wallet')
-                .then(data => {
-                    // 转义HTML特殊字符，避免XSS
-                    const safeData = JSON.stringify(data).replace(/[&<>"']/g, char => {
-                        const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-                        return escapeMap[char];
-                    });
-                    resultContainer.innerHTML += `<div class="suc">✅ getCommonBodyEvent succeed：${safeData}</div>`;
-                })
-                .catch(error => {
-                    // 转义错误信息
-                    const safeError = String(error).replace(/[&<>"']/g, char => {
-                        const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-                        return escapeMap[char];
-                    });
-                    resultContainer.innerHTML += `<div class="err">❌ getCommonBodyEvent failed：${safeError}</div>`;
-                });
-        }, 100);
-
-
-    };
-
-    // 确保DOM加载完成后初始化
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        initPage();
-    } else {
-        document.addEventListener('DOMContentLoaded', initPage);
-    }
-})();
+// 10秒后自动移除
+setTimeout(() => {
+    display.style.transition = 'opacity 1s';
+    display.style.opacity = '0';
+    setTimeout(() => display.remove(), 1000);
+}, 10000);
