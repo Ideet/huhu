@@ -35,26 +35,27 @@
 
         // ========================= API调用逻辑（统一管理） =========================
         // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
-        setTimeout(() => {
-            // 调用Native接口并捕获异常
-            JsInterface.getCommonBodyEvent()
-                .then(data => {
-                    // 转义HTML特殊字符，避免XSS
-                    const safeData = JSON.stringify(data).replace(/[&<>"']/g, char => {
-                        const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-                        return escapeMap[char];
-                    });
-                    resultContainer.innerHTML += `<div class="suc">✅ getCommonBodyEvent succeed：${safeData}</div>`;
-                })
-                .catch(error => {
-                    // 转义错误信息
-                    const safeError = String(error).replace(/[&<>"']/g, char => {
-                        const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-                        return escapeMap[char];
-                    });
-                    resultContainer.innerHTML += `<div class="err">❌ getCommonBodyEvent failed：${safeError}</div>`;
-                });
-        }, 100);
+setTimeout(() => {
+    // 定义一个Want对象
+    const want = {
+        bundleName: "com.umetrip.hm.app", // 目标应用的包名
+        abilityName: "EntryAbility", // 目标能力的名称
+    };
+
+    // 调用Native接口并捕获异常
+    JsInterface.startAbilityByWant(want)
+        .then(success => {
+            resultContainer.innerHTML += `<div class="suc">✅ startAbilityByWant succeed：${success}</div>`;
+        })
+        .catch(error => {
+            // 转义错误信息
+            const safeError = String(error).replace(/[&<>"']/g, char => {
+                const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return escapeMap[char];
+            });
+            resultContainer.innerHTML += `<div class="err">❌ startAbilityByWant failed：${safeError}</div>`;
+        });
+}, 100);
 
 
     };
