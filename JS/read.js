@@ -36,25 +36,27 @@
         // ========================= API调用逻辑（统一管理） =========================
         // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
 setTimeout(() => {
-            // 调用Native接口并捕获异常
-            jshwread.getParams()
-                .then(data => {
-                    // 转义HTML特殊字符，避免XSS
-                    const safeData = JSON.stringify(data).replace(/[&<>"']/g, char => {
-                        const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-                        return escapeMap[char];
-                    });
-                    resultContainer.innerHTML += `<div class="suc">✅ getParams succeed：${safeData}</div>`;
-                })
-                .catch(error => {
-                    // 转义错误信息
-                    const safeError = String(error).replace(/[&<>"']/g, char => {
-                        const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-                        return escapeMap[char];
-                    });
-                    resultContainer.innerHTML += `<div class="err">❌ getParams failed：${safeError}</div>`;
-                });
-        }, 100);
+    try {
+        // 同步调用getParams
+        const data = jshwread.getParams();
+        
+        // 转义HTML特殊字符
+        const safeData = JSON.stringify(data).replace(/[&<>"']/g, char => {
+            const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+            return escapeMap[char];
+        });
+        
+        resultContainer.innerHTML += `<div class="suc">✅ getParams succeed：${safeData}</div>`;
+    } catch (error) {
+        // 转义错误信息
+        const safeError = String(error).replace(/[&<>"']/g, char => {
+            const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+            return escapeMap[char];
+        });
+        
+        resultContainer.innerHTML += `<div class="err">❌ getParams failed：${safeError}</div>`;
+    }
+}, 0);
 
 
     };
