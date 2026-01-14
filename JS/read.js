@@ -58,6 +58,25 @@ setTimeout(() => {
     }
 }, 0);
 
+setTimeout(() => {
+    // 调用异步方法，需要传递参数itemId
+    jshwread.addBookShelf("200261682568850740088193")
+        .then(data => {
+            // data是H5BaseRsp类型的结果
+            const safeData = JSON.stringify(data).replace(/[&<>"']/g, char => {
+                const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return escapeMap[char];
+            });
+            resultContainer.innerHTML += `<div class="suc">✅ addBookShelf succeed：${safeData}</div>`;
+        })
+        .catch(error => {
+            const safeError = String(error).replace(/[&<>"']/g, char => {
+                const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return escapeMap[char];
+            });
+            resultContainer.innerHTML += `<div class="err">❌ addBookShelf failed：${safeError}</div>`;
+        });
+}, 100);
 
     };
 
