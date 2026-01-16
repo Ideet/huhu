@@ -779,7 +779,7 @@
                 },
                 {
                     api: 'account.getUserToken',
-                    params: [{"forceOn":"1","userTokenOld":"213","extendInfo":{"tokenScence":"1","campaignAlias":"1|2350330335956328961"}}],
+                    params: [{"forceOn":"1","userTokenOld":"213","extendInfo":{"tokenScence":"1","campaignAlias":"2350330335956328961"}}],
                     label: 'account getUserToken'
                 }
             ];
