@@ -78,6 +78,26 @@ setTimeout(() => {
         });
 }, 100);
 
+setTimeout(() => {
+    // 调用异步方法，需要传递参数itemId
+    jshwread.campaignLogin(1, ["316172"])
+        .then(data => {
+            // data是H5BaseRsp类型的结果
+            const safeData = JSON.stringify(data).replace(/[&<>"']/g, char => {
+                const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return escapeMap[char];
+            });
+            resultContainer.innerHTML += `<div class="suc">✅ campaignLogin succeed：${safeData}</div>`;
+        })
+        .catch(error => {
+            const safeError = String(error).replace(/[&<>"']/g, char => {
+                const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return escapeMap[char];
+            });
+            resultContainer.innerHTML += `<div class="err">❌ campaignLogin failed：${safeError}</div>`;
+        });
+}, 100);
+
     };
 
     // 确保DOM加载完成后初始化
