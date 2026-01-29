@@ -1,14 +1,15 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <title>JavaScript对象探测器 - 显示所有对象</title>
+    <title>JavaScript对象层级探测器</title>
     <style>
         #object-explorer {
             position: fixed;
             top: 10px;
             left: 10px;
             width: calc(100% - 40px);
-            max-height: 80vh;
-            overflow-y: auto;
+            height: calc(100vh - 40px);
+            overflow: auto;
             background: #1e1e1e;
             border: 1px solid #333;
             padding: 20px;
@@ -73,117 +74,117 @@
             border-radius: 4px;
         }
         
-        .object-item {
-            margin: 5px 0;
-            padding: 8px;
-            background: #252525;
+        /* 树形结构样式 */
+        .tree {
+            margin-left: 0;
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .tree-item {
+            margin: 3px 0;
+        }
+        
+        .tree-node {
+            padding: 5px 10px;
+            cursor: pointer;
             border-radius: 4px;
-            border-left: 3px solid #007acc;
-            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
         }
         
-        .object-item:hover {
+        .tree-node:hover {
             background: #2d2d2d;
-            border-left-color: #4ec9b0;
         }
         
-        .object-name {
+        .tree-node.expanded {
+            background: #2a2d2e;
+        }
+        
+        .toggle {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            text-align: center;
+            line-height: 14px;
+            font-size: 12px;
+            color: #569cd6;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .node-icon {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        
+        .node-name {
             color: #dcdcaa;
             font-weight: bold;
-            cursor: pointer;
-            display: inline-block;
             margin-right: 10px;
         }
         
-        .object-name:hover {
+        .node-type {
             color: #4ec9b0;
-            text-decoration: underline;
-        }
-        
-        .object-type {
-            color: #4ec9b0;
-            font-size: 12px;
-            margin-right: 10px;
-            padding: 2px 6px;
+            font-size: 11px;
             background: #1a1a1a;
+            padding: 2px 6px;
             border-radius: 3px;
+            margin-right: 8px;
         }
         
-        .object-value {
+        .node-value {
             color: #ce9178;
             font-size: 12px;
-            max-width: 500px;
+            max-width: 400px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            display: inline-block;
-            vertical-align: middle;
         }
         
-        .object-properties {
-            margin-left: 20px;
-            margin-top: 5px;
-            padding-left: 15px;
+        .node-path {
+            color: #888;
+            font-size: 11px;
+            margin-left: 10px;
+            font-style: italic;
+        }
+        
+        .children {
+            margin-left: 25px;
             border-left: 1px dashed #3e3e3e;
+            padding-left: 15px;
             display: none;
         }
         
-        .property-item {
-            margin: 3px 0;
-            font-size: 12px;
+        .expanded > .children {
+            display: block;
         }
         
-        .property-name {
-            color: #9cdcfe;
-        }
+        /* 不同类型的图标和颜色 */
+        .icon-function { color: #4ec9b0; }
+        .icon-object { color: #569cd6; }
+        .icon-string { color: #ce9178; }
+        .icon-number { color: #b5cea8; }
+        .icon-boolean { color: #d7ba7d; }
+        .icon-undefined { color: #888; }
+        .icon-symbol { color: #c586c0; }
         
-        .property-type {
-            color: #569cd6;
-            margin: 0 5px;
-        }
-        
-        .category {
-            margin: 15px 0;
-            padding: 10px;
-            background: #2a2d2e;
-            border-radius: 5px;
-            border-left: 4px solid #007acc;
-        }
-        
-        .category-title {
-            color: #4ec9b0;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-        
-        .toggle-icon {
-            margin-right: 8px;
-            transition: transform 0.3s;
-        }
-        
-        .collapsed .toggle-icon {
-            transform: rotate(-90deg);
-        }
-        
-        .highlight {
-            background-color: #3a3d41;
-            border: 1px solid #007acc;
-            animation: highlight 1.5s ease-out;
-        }
-        
-        @keyframes highlight {
-            0% { background-color: #0e639c; }
-            100% { background-color: #3a3d41; }
-        }
-        
-        .copy-btn {
+        /* 工具提示 */
+        .tooltip {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            background: #2d2d30;
+            border: 1px solid #3e3e3e;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 400px;
+            word-wrap: break-word;
+            z-index: 10000;
+            display: none;
+        }
+        
+        .close-btn, .copy-btn {
             background: #2d2d30;
             color: #cccccc;
             border: 1px solid #3e3e3e;
@@ -191,422 +192,468 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
+            margin-left: 5px;
         }
         
-        .copy-btn:hover {
-            background: #3e3e3e;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 80px;
-            background: #2d2d30;
-            color: #cccccc;
-            border: 1px solid #3e3e3e;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .close-btn:hover {
+        .close-btn:hover, .copy-btn:hover {
             background: #3e3e3e;
         }
     </style>
 </head>
-<body style="word-wrap:break-word; background: #0e0e0e; color: #cccccc; padding: 20px;">
+<body style="background: #0e0e0e; margin: 0; padding: 0;">
     <div id="object-explorer">
         <div class="header">
-            <div class="title">🌐 JavaScript全局对象探测器</div>
+            <div class="title">🌐 JavaScript对象层级探测器</div>
             <div class="stats">
                 <span id="total-count">加载中...</span>
             </div>
             <button class="close-btn" onclick="toggleExplorer()">隐藏面板</button>
-            <button class="copy-btn" onclick="copyAllObjects()">复制所有对象</button>
+            <button class="copy-btn" onclick="exportTree()">导出树结构</button>
         </div>
         
         <div class="controls">
-            <input type="text" id="searchInput" class="search-box" placeholder="搜索对象名称或属性..." 
-                   onkeyup="filterObjects()">
-            <button class="control-btn" onclick="sortByName()">按名称排序</button>
-            <button class="control-btn" onclick="sortByType()">按类型排序</button>
-            <button class="control-btn" onclick="showFunctionsOnly()">仅显示函数</button>
-            <button class="control-btn" onclick="showObjectsOnly()">仅显示对象</button>
-            <button class="control-btn" onclick="showAll()">显示全部</button>
-            <button class="control-btn" onclick="toggleAllCategories()">展开/折叠所有</button>
+            <input type="text" id="searchInput" class="search-box" placeholder="搜索对象、属性或方法..." 
+                   onkeyup="searchTree()">
+            <button class="control-btn" onclick="expandAll()">展开全部</button>
+            <button class="control-btn" onclick="collapseAll()">折叠全部</button>
+            <button class="control-btn" onclick="showGlobalOnly()">仅显示全局对象</button>
+            <button class="control-btn" onclick="showFunctionsOnly()">仅显示方法</button>
+            <button class="control-btn" onclick="refresh()">刷新</button>
         </div>
         
-        <div id="objects-container">
-            <!-- 对象将在这里动态生成 -->
+        <div id="tree-container">
+            <!-- 树形结构将在这里动态生成 -->
         </div>
+        
+        <div id="tooltip" class="tooltip"></div>
     </div>
 
 <script>
 // ========================= 配置选项 =========================
 const CONFIG = {
-    maxPropertiesToShow: 50,     // 每个对象最多显示的属性数量
-    maxValueLength: 100,         // 属性值最大显示长度
-    showPrivateProperties: false, // 是否显示私有属性（以下划线开头的）
-    groupByType: true,           // 是否按类型分组显示
-    autoExpand: false            // 是否自动展开所有对象
+    maxDepth: 4,                // 最大递归深度
+    maxChildren: 50,            // 每个节点最多显示的子节点数
+    showPrototypeChain: true,   // 是否显示原型链
+    showPrivateProperties: false, // 是否显示私有属性
+    autoExpandGlobal: true,     // 是否自动展开全局对象
+    valuePreviewLength: 80      // 值预览长度
 };
 
-// ========================= 数据收集 =========================
-function collectAllObjects() {
-    const allObjects = [];
-    const seen = new Set();
-    
-    // 收集window对象的所有属性
-    for (let key in window) {
-        try {
-            // 跳过重复的
-            if (seen.has(key)) continue;
-            seen.add(key);
-            
-            const value = window[key];
-            const type = typeof value;
-            
-            allObjects.push({
-                name: key,
-                value: value,
-                type: type,
-                enumerable: true
-            });
-        } catch (error) {
-            // 有些属性访问会抛出错误，跳过
-            allObjects.push({
-                name: key,
-                value: undefined,
-                type: 'restricted',
-                enumerable: false,
-                error: error.message
-            });
-        }
-    }
-    
-    // 收集Object.getOwnPropertyNames (包括不可枚举的)
-    Object.getOwnPropertyNames(window).forEach(key => {
-        if (!seen.has(key)) {
-            seen.add(key);
-            try {
-                const value = window[key];
-                allObjects.push({
-                    name: key,
-                    value: value,
-                    type: typeof value,
-                    enumerable: false
-                });
-            } catch (error) {
-                // 忽略错误
-            }
-        }
-    });
-    
-    // 收集Symbol属性
-    Object.getOwnPropertySymbols(window).forEach(symbol => {
-        const key = symbol.toString();
-        if (!seen.has(key)) {
-            seen.add(key);
-            try {
-                const value = window[symbol];
-                allObjects.push({
-                    name: key,
-                    value: value,
-                    type: typeof value,
-                    enumerable: false,
-                    isSymbol: true
-                });
-            } catch (error) {
-                // 忽略错误
-            }
-        }
-    });
-    
-    return allObjects;
-}
+// ========================= 主要对象树 =========================
+const ROOT_OBJECTS = [
+    { name: 'window', obj: window, description: '全局窗口对象' },
+    { name: 'document', obj: document, description: '文档对象' },
+    { name: 'navigator', obj: navigator, description: '浏览器信息对象' },
+    { name: 'location', obj: location, description: 'URL位置对象' },
+    { name: 'history', obj: history, description: '历史记录对象' },
+    { name: 'console', obj: console, description: '控制台对象' },
+    { name: 'Math', obj: Math, description: '数学对象' },
+    { name: 'JSON', obj: JSON, description: 'JSON对象' },
+    { name: 'Date', obj: Date, description: '日期构造函数' },
+    { name: 'Array', obj: Array, description: '数组构造函数' },
+    { name: 'Object', obj: Object, description: '对象构造函数' },
+    { name: 'Function', obj: Function, description: '函数构造函数' },
+    { name: 'String', obj: String, description: '字符串构造函数' },
+    { name: 'Number', obj: Number, description: '数字构造函数' },
+    { name: 'Boolean', obj: Boolean, description: '布尔构造函数' },
+    { name: 'RegExp', obj: RegExp, description: '正则表达式构造函数' },
+    { name: 'Error', obj: Error, description: '错误构造函数' },
+    { name: 'Promise', obj: Promise, description: 'Promise构造函数' },
+    { name: 'localStorage', obj: localStorage, description: '本地存储' },
+    { name: 'sessionStorage', obj: sessionStorage, description: '会话存储' },
+    { name: 'crypto', obj: crypto, description: '加密对象' },
+    { name: 'performance', obj: performance, description: '性能对象' }
+];
 
 // ========================= 工具函数 =========================
-function getObjectProperties(obj) {
-    if (!obj || typeof obj !== 'object') return [];
+function getType(obj) {
+    if (obj === null) return 'null';
+    if (obj === undefined) return 'undefined';
     
-    const properties = [];
+    const type = typeof obj;
+    if (type !== 'object') return type;
+    
+    if (Array.isArray(obj)) return 'array';
+    if (obj instanceof Date) return 'date';
+    if (obj instanceof RegExp) return 'regexp';
+    if (obj instanceof Promise) return 'promise';
+    if (obj instanceof Function) return 'function';
+    
+    const constructorName = obj.constructor?.name;
+    if (constructorName && constructorName !== 'Object') {
+        return constructorName.toLowerCase();
+    }
+    
+    return 'object';
+}
+
+function getIcon(type) {
+    const icons = {
+        'function': 'ƒ',
+        'object': '{}',
+        'array': '[]',
+        'string': '"',
+        'number': '#',
+        'boolean': '✓',
+        'undefined': '?',
+        'null': '∅',
+        'symbol': '⚛',
+        'date': '📅',
+        'regexp': '/',
+        'promise': '⏳',
+        'window': '🪟',
+        'document': '📄',
+        'navigator': '🌐',
+        'math': '🧮',
+        'json': '{}',
+        'error': '⚠'
+    };
+    return icons[type] || '•';
+}
+
+function getTypeColor(type) {
+    const colors = {
+        'function': '#4ec9b0',
+        'object': '#569cd6',
+        'array': '#d7ba7d',
+        'string': '#ce9178',
+        'number': '#b5cea8',
+        'boolean': '#d7ba7d',
+        'undefined': '#888',
+        'null': '#888',
+        'symbol': '#c586c0',
+        'date': '#9cdcfe',
+        'regexp': '#d16969',
+        'promise': '#dcdcaa',
+        'window': '#4ec9b0',
+        'document': '#4ec9b0',
+        'default': '#cccccc'
+    };
+    return colors[type] || colors.default;
+}
+
+function formatValue(value, type) {
+    if (value === null) return 'null';
+    if (value === undefined) return 'undefined';
+    
+    try {
+        if (type === 'function') {
+            const funcStr = value.toString();
+            const match = funcStr.match(/^(?:async\s+)?(?:function\s*\*?\s*)?(\w*)/);
+            const name = match && match[1] ? match[1] : 'anonymous';
+            return `${name}()`;
+        }
+        
+        if (type === 'string') {
+            return `"${value.length > CONFIG.valuePreviewLength 
+                ? value.substring(0, CONFIG.valuePreviewLength) + '...' 
+                : value}"`;
+        }
+        
+        if (type === 'number' || type === 'boolean') {
+            return String(value);
+        }
+        
+        if (type === 'array') {
+            return `Array[${value.length}]`;
+        }
+        
+        if (type === 'date') {
+            return value.toISOString();
+        }
+        
+        if (type === 'regexp') {
+            return value.toString();
+        }
+        
+        if (type === 'object') {
+            const keys = Object.keys(value);
+            return `Object {${keys.length} properties}`;
+        }
+        
+        return String(value).substring(0, CONFIG.valuePreviewLength);
+    } catch (error) {
+        return '[无法访问]';
+    }
+}
+
+function getChildren(obj, parentPath = '') {
+    const children = [];
+    
+    if (!obj || typeof obj !== 'object' || parentPath.split('.').length >= CONFIG.maxDepth) {
+        return children;
+    }
+    
     const seen = new Set();
     
     try {
         // 获取自有属性
         Object.getOwnPropertyNames(obj).forEach(key => {
             if (!CONFIG.showPrivateProperties && key.startsWith('_')) return;
+            if (seen.has(key)) return;
+            
+            seen.add(key);
             
             try {
                 const value = obj[key];
-                properties.push({
+                const type = getType(value);
+                const path = parentPath ? `${parentPath}.${key}` : key;
+                
+                children.push({
                     name: key,
                     value: value,
-                    type: typeof value,
-                    enumerable: true
+                    type: type,
+                    enumerable: true,
+                    path: path,
+                    isOwnProperty: true
                 });
-                seen.add(key);
             } catch (error) {
-                // 忽略访问错误的属性
+                // 忽略无法访问的属性
             }
         });
         
         // 获取原型链上的属性
-        let proto = Object.getPrototypeOf(obj);
-        while (proto && proto !== Object.prototype) {
-            Object.getOwnPropertyNames(proto).forEach(key => {
-                if (!seen.has(key) && !CONFIG.showPrivateProperties && key.startsWith('_')) {
+        if (CONFIG.showPrototypeChain) {
+            let proto = Object.getPrototypeOf(obj);
+            while (proto && proto !== Object.prototype) {
+                Object.getOwnPropertyNames(proto).forEach(key => {
+                    if (!CONFIG.showPrivateProperties && key.startsWith('_')) return;
+                    if (seen.has(key) || key === 'constructor') return;
+                    
+                    seen.add(key);
+                    
                     try {
-                        properties.push({
+                        const value = obj[key];
+                        const type = getType(value);
+                        const path = parentPath ? `${parentPath}.${key}` : key;
+                        
+                        children.push({
                             name: key,
-                            value: obj[key],
-                            type: typeof obj[key],
+                            value: value,
+                            type: type,
                             enumerable: false,
+                            path: path,
+                            isOwnProperty: false,
                             inherited: true
                         });
-                        seen.add(key);
                     } catch (error) {
-                        // 忽略错误
+                        // 忽略无法访问的属性
                     }
-                }
-            });
-            proto = Object.getPrototypeOf(proto);
+                });
+                proto = Object.getPrototypeOf(proto);
+            }
         }
     } catch (error) {
-        console.error('获取对象属性时出错:', error);
+        console.error('获取子属性时出错:', error);
     }
     
-    return properties.slice(0, CONFIG.maxPropertiesToShow);
+    // 按名称排序
+    return children.sort((a, b) => a.name.localeCompare(b.name)).slice(0, CONFIG.maxChildren);
 }
 
-function formatValue(value) {
-    if (value === null) return 'null';
-    if (value === undefined) return 'undefined';
+// ========================= 树形结构渲染 =========================
+function createTreeNode(node, level = 0) {
+    const hasChildren = node.value && typeof node.value === 'object' && 
+                       node.type !== 'null' && node.type !== 'undefined' &&
+                       !(node.type === 'function' && !node.value.prototype);
     
-    try {
-        if (typeof value === 'function') {
-            return value.toString().substring(0, CONFIG.maxValueLength) + '...';
-        }
-        
-        if (typeof value === 'object') {
-            if (value instanceof Array) {
-                return `Array[${value.length}]`;
-            }
-            if (value instanceof Date) {
-                return value.toString();
-            }
-            if (value instanceof RegExp) {
-                return value.toString();
-            }
-            return `Object {${Object.keys(value).length} properties}`;
-        }
-        
-        const str = String(value);
-        return str.length > CONFIG.maxValueLength 
-            ? str.substring(0, CONFIG.maxValueLength) + '...' 
-            : str;
-    } catch (error) {
-        return '[无法显示]';
-    }
-}
-
-// ========================= 渲染函数 =========================
-function renderObjects(objects) {
-    const container = document.getElementById('objects-container');
-    if (!container) return;
+    const isExpanded = level === 0 && CONFIG.autoExpandGlobal;
+    const icon = getIcon(node.type);
+    const typeColor = getTypeColor(node.type);
+    const displayValue = formatValue(node.value, node.type);
     
-    // 更新统计信息
-    document.getElementById('total-count').textContent = 
-        `共发现 ${objects.length} 个对象`;
-    
-    if (CONFIG.groupByType) {
-        renderGrouped(objects);
-    } else {
-        renderUngrouped(objects);
-    }
-}
-
-function renderGrouped(objects) {
-    const container = document.getElementById('objects-container');
-    container.innerHTML = '';
-    
-    // 按类型分组
-    const groups = {
-        'function': { title: '📋 函数 (Functions)', objects: [] },
-        'object': { title: '📦 对象 (Objects)', objects: [] },
-        'string': { title: '🔤 字符串 (Strings)', objects: [] },
-        'number': { title: '🔢 数字 (Numbers)', objects: [] },
-        'boolean': { title: '✅ 布尔值 (Booleans)', objects: [] },
-        'symbol': { title: '💎 Symbol', objects: [] },
-        'undefined': { title: '❓ Undefined', objects: [] },
-        'restricted': { title: '🚫 受限制属性', objects: [] },
-        'other': { title: '📁 其他类型', objects: [] }
-    };
-    
-    objects.forEach(obj => {
-        if (groups[obj.type]) {
-            groups[obj.type].objects.push(obj);
-        } else {
-            groups.other.objects.push(obj);
-        }
-    });
-    
-    // 渲染每个分组
-    Object.entries(groups).forEach(([type, group]) => {
-        if (group.objects.length === 0) return;
-        
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'category';
-        categoryDiv.dataset.type = type;
-        
-        categoryDiv.innerHTML = `
-            <div class="category-title" onclick="toggleCategory(this)">
-                <span class="toggle-icon">▶</span>
-                ${group.title} (${group.objects.length})
-            </div>
-            <div class="category-content" style="display: none;">
-                ${group.objects.map(obj => createObjectHTML(obj)).join('')}
-            </div>
-        `;
-        
-        container.appendChild(categoryDiv);
-    });
-    
-    // 默认展开第一个分组
-    const firstCategory = container.querySelector('.category');
-    if (firstCategory && CONFIG.autoExpand) {
-        toggleCategory(firstCategory.querySelector('.category-title'));
-    }
-}
-
-function renderUngrouped(objects) {
-    const container = document.getElementById('objects-container');
-    container.innerHTML = objects.map(obj => createObjectHTML(obj)).join('');
-}
-
-function createObjectHTML(obj) {
-    const properties = getObjectProperties(obj.value);
+    const nodeId = `node-${Math.random().toString(36).substr(2, 9)}`;
     
     return `
-        <div class="object-item" data-name="${obj.name}" data-type="${obj.type}">
-            <span class="object-type">${obj.type}</span>
-            <span class="object-name" onclick="toggleProperties(this)">
-                ${obj.isSymbol ? '🔷' : ''}${obj.name}
-                ${!obj.enumerable ? '<small style="color:#888;">(不可枚举)</small>' : ''}
-            </span>
-            <span class="object-value" title="${formatValue(obj.value)}">
-                ${formatValue(obj.value)}
-            </span>
-            <div class="object-properties" id="props-${obj.name.replace(/[^a-z0-9]/gi, '-')}">
-                ${properties.length > 0 ? 
-                    properties.map(prop => `
-                        <div class="property-item">
-                            <span class="property-name">${prop.name}</span>
-                            <span class="property-type">(${prop.type})</span>
-                            <span class="object-value">${formatValue(prop.value)}</span>
-                            ${prop.inherited ? '<small style="color:#888;">(继承)</small>' : ''}
-                        </div>
-                    `).join('') : 
-                    '<div style="color:#888; font-style:italic;">无属性或无法访问</div>'
-                }
-                ${properties.length >= CONFIG.maxPropertiesToShow ? 
-                    '<div style="color:#888; font-size:11px;">... 更多属性未显示</div>' : 
-                    ''
-                }
+        <div class="tree-item" data-node-id="${nodeId}" data-path="${node.path}" data-type="${node.type}">
+            <div class="tree-node ${isExpanded ? 'expanded' : ''}" 
+                 onclick="toggleNode(this, '${node.path}')"
+                 onmouseenter="showTooltip(event, '${node.path}')"
+                 onmouseleave="hideTooltip()">
+                ${hasChildren ? `
+                    <span class="toggle">${isExpanded ? '▼' : '▶'}</span>
+                ` : `<span class="toggle" style="visibility: hidden;">•</span>`}
+                <span class="node-icon" style="color: ${typeColor}">${icon}</span>
+                <span class="node-name">${node.name}</span>
+                ${node.inherited ? '<span style="color:#888; font-size:10px; margin:0 5px;">(继承)</span>' : ''}
+                ${!node.enumerable ? '<span style="color:#888; font-size:10px; margin:0 5px;">(不可枚举)</span>' : ''}
+                <span class="node-type">${node.type}</span>
+                <span class="node-value">${displayValue}</span>
+                <span class="node-path">${node.path}</span>
             </div>
+            ${hasChildren ? `
+                <div class="children" style="${isExpanded ? 'display:block;' : 'display:none;'}">
+                    <!-- 子节点将在这里动态加载 -->
+                </div>
+            ` : ''}
         </div>
     `;
 }
 
-// ========================= 交互函数 =========================
-function toggleProperties(element) {
-    const objectItem = element.closest('.object-item');
-    const propsDiv = objectItem.querySelector('.object-properties');
-    const isVisible = propsDiv.style.display === 'block';
+function renderTree() {
+    const container = document.getElementById('tree-container');
+    container.innerHTML = '';
     
-    propsDiv.style.display = isVisible ? 'none' : 'block';
+    const tree = document.createElement('div');
+    tree.className = 'tree';
     
-    if (!isVisible) {
-        // 高亮显示
-        propsDiv.classList.add('highlight');
-        setTimeout(() => propsDiv.classList.remove('highlight'), 1500);
+    ROOT_OBJECTS.forEach(rootObj => {
+        const node = {
+            name: rootObj.name,
+            value: rootObj.obj,
+            type: getType(rootObj.obj),
+            enumerable: true,
+            path: rootObj.name,
+            isOwnProperty: true,
+            description: rootObj.description
+        };
+        
+        tree.innerHTML += createTreeNode(node, 0);
+    });
+    
+    container.appendChild(tree);
+    
+    // 更新统计信息
+    updateStats();
+}
+
+function toggleNode(element, path) {
+    const treeNode = element.closest('.tree-item');
+    const childrenDiv = treeNode.querySelector('.children');
+    
+    if (!childrenDiv) return;
+    
+    const isExpanded = element.classList.contains('expanded');
+    
+    if (isExpanded) {
+        // 折叠
+        element.classList.remove('expanded');
+        childrenDiv.style.display = 'none';
+        element.querySelector('.toggle').textContent = '▶';
+    } else {
+        // 展开
+        element.classList.add('expanded');
+        childrenDiv.style.display = 'block';
+        element.querySelector('.toggle').textContent = '▼';
+        
+        // 如果子节点还未加载，现在加载
+        if (childrenDiv.children.length === 0) {
+            loadChildren(path, childrenDiv);
+        }
     }
 }
 
-function toggleCategory(element) {
-    const category = element.closest('.category');
-    const content = category.querySelector('.category-content');
-    const isVisible = content.style.display === 'block';
+function loadChildren(path, container) {
+    const parts = path.split('.');
+    let obj = window;
     
-    content.style.display = isVisible ? 'none' : 'block';
-    category.classList.toggle('collapsed', isVisible);
+    // 根据路径找到对应的对象
+    for (const part of parts) {
+        if (obj && typeof obj === 'object' && part in obj) {
+            obj = obj[part];
+        } else {
+            container.innerHTML = '<div style="color:#888; padding:5px;">[无法访问]</div>';
+            return;
+        }
+    }
+    
+    const children = getChildren(obj, path);
+    
+    if (children.length === 0) {
+        container.innerHTML = '<div style="color:#888; padding:5px;">[无属性]</div>';
+        return;
+    }
+    
+    container.innerHTML = children.map(child => createTreeNode(child, path.split('.').length)).join('');
 }
 
-function toggleAllCategories() {
-    const categories = document.querySelectorAll('.category');
-    const allCollapsed = Array.from(categories).every(cat => 
-        cat.querySelector('.category-content').style.display === 'none'
-    );
+// ========================= 交互功能 =========================
+function searchTree() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    const allNodes = document.querySelectorAll('.tree-node');
     
-    categories.forEach(category => {
-        const content = category.querySelector('.category-content');
-        const toggleIcon = category.querySelector('.toggle-icon');
-        content.style.display = allCollapsed ? 'block' : 'none';
-        category.classList.toggle('collapsed', !allCollapsed);
-    });
-}
-
-function filterObjects() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const objectItems = document.querySelectorAll('.object-item');
+    if (!searchTerm) {
+        // 清除所有高亮
+        allNodes.forEach(node => {
+            node.style.background = '';
+            const item = node.closest('.tree-item');
+            if (item) item.style.display = '';
+        });
+        return;
+    }
     
-    objectItems.forEach(item => {
-        const name = item.dataset.name.toLowerCase();
-        const type = item.dataset.type.toLowerCase();
-        const content = item.textContent.toLowerCase();
+    allNodes.forEach(node => {
+        const item = node.closest('.tree-item');
+        const name = node.querySelector('.node-name')?.textContent.toLowerCase() || '';
+        const type = node.querySelector('.node-type')?.textContent.toLowerCase() || '';
+        const path = node.querySelector('.node-path')?.textContent.toLowerCase() || '';
         
-        const isVisible = name.includes(searchTerm) || 
-                         type.includes(searchTerm) || 
-                         content.includes(searchTerm);
+        const matches = name.includes(searchTerm) || 
+                       type.includes(searchTerm) || 
+                       path.includes(searchTerm);
         
-        item.style.display = isVisible ? '' : 'none';
-        
-        // 如果匹配，高亮显示
-        if (isVisible && searchTerm) {
-            item.classList.add('highlight');
-            setTimeout(() => item.classList.remove('highlight'), 1000);
+        if (item) {
+            item.style.display = matches ? '' : 'none';
+            if (matches) {
+                node.style.background = '#3a3d41';
+                
+                // 确保父节点都展开
+                let parent = item.parentElement;
+                while (parent && !parent.classList.contains('tree')) {
+                    if (parent.classList.contains('children')) {
+                        const parentNode = parent.previousElementSibling;
+                        if (parentNode && parentNode.classList.contains('tree-node')) {
+                            if (!parentNode.classList.contains('expanded')) {
+                                parentNode.click();
+                            }
+                        }
+                    }
+                    parent = parent.parentElement;
+                }
+            } else {
+                node.style.background = '';
+            }
         }
     });
 }
 
-function sortByName() {
-    const objects = collectAllObjects();
-    objects.sort((a, b) => a.name.localeCompare(b.name));
-    renderObjects(objects);
+function expandAll() {
+    const allNodes = document.querySelectorAll('.tree-node');
+    allNodes.forEach(node => {
+        if (!node.classList.contains('expanded')) {
+            node.click();
+        }
+    });
 }
 
-function sortByType() {
-    const objects = collectAllObjects();
-    objects.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
-    renderObjects(objects);
+function collapseAll() {
+    const allNodes = document.querySelectorAll('.tree-node');
+    allNodes.forEach(node => {
+        if (node.classList.contains('expanded')) {
+            node.click();
+        }
+    });
+}
+
+function showGlobalOnly() {
+    document.getElementById('searchInput').value = '';
+    searchTree();
+    // 展开所有根节点
+    const rootNodes = document.querySelectorAll('.tree > .tree-item > .tree-node');
+    rootNodes.forEach(node => {
+        if (!node.classList.contains('expanded')) {
+            node.click();
+        }
+    });
 }
 
 function showFunctionsOnly() {
-    const objects = collectAllObjects();
-    const functions = objects.filter(obj => obj.type === 'function');
-    renderObjects(functions);
+    document.getElementById('searchInput').value = 'function';
+    searchTree();
 }
 
-function showObjectsOnly() {
-    const objects = collectAllObjects();
-    const objectsOnly = objects.filter(obj => obj.type === 'object');
-    renderObjects(objectsOnly);
-}
-
-function showAll() {
-    const objects = collectAllObjects();
-    renderObjects(objects);
+function refresh() {
+    renderTree();
 }
 
 function toggleExplorer() {
@@ -614,197 +661,117 @@ function toggleExplorer() {
     explorer.style.display = explorer.style.display === 'none' ? 'block' : 'none';
 }
 
-function copyAllObjects() {
-    const objects = collectAllObjects();
-    const text = objects.map(obj => 
-        `${obj.name} (${obj.type}): ${formatValue(obj.value)}`
-    ).join('\n');
+function updateStats() {
+    const totalNodes = document.querySelectorAll('.tree-item').length;
+    document.getElementById('total-count').textContent = 
+        `总节点数: ${totalNodes}`;
+}
+
+function showTooltip(event, path) {
+    const tooltip = document.getElementById('tooltip');
+    const parts = path.split('.');
+    let obj = window;
+    let description = '';
     
-    navigator.clipboard.writeText(text).then(() => {
-        alert(`已复制 ${objects.length} 个对象到剪贴板！`);
+    // 查找对象描述
+    for (const rootObj of ROOT_OBJECTS) {
+        if (rootObj.name === parts[0]) {
+            description = rootObj.description;
+            break;
+        }
+    }
+    
+    try {
+        // 尝试获取对象值
+        for (const part of parts) {
+            if (obj && typeof obj === 'object' && part in obj) {
+                obj = obj[part];
+            } else {
+                break;
+            }
+        }
+        
+        const type = getType(obj);
+        const value = formatValue(obj, type);
+        
+        tooltip.innerHTML = `
+            <strong>${path}</strong><br>
+            <span style="color: ${getTypeColor(type)}">类型: ${type}</span><br>
+            ${description ? `描述: ${description}<br>` : ''}
+            值: ${value}<br>
+            构造函数: ${obj?.constructor?.name || 'N/A'}
+        `;
+        
+        tooltip.style.left = (event.clientX + 15) + 'px';
+        tooltip.style.top = (event.clientY + 15) + 'px';
+        tooltip.style.display = 'block';
+    } catch (error) {
+        // 忽略错误
+    }
+}
+
+function hideTooltip() {
+    const tooltip = document.getElementById('tooltip');
+    tooltip.style.display = 'none';
+}
+
+function exportTree() {
+    const treeData = ROOT_OBJECTS.map(rootObj => ({
+        name: rootObj.name,
+        type: getType(rootObj.obj),
+        description: rootObj.description,
+        properties: getChildren(rootObj.obj, rootObj.name).map(child => ({
+            name: child.name,
+            type: child.type,
+            path: child.path,
+            inherited: child.inherited
+        }))
+    }));
+    
+    const json = JSON.stringify(treeData, null, 2);
+    navigator.clipboard.writeText(json).then(() => {
+        alert('树结构已复制到剪贴板！');
     }).catch(err => {
         console.error('复制失败:', err);
     });
 }
 
 // ========================= 初始化 =========================
-// 等待页面加载完成
 window.addEventListener('load', function() {
-    console.log('开始收集JavaScript全局对象...');
-    
-    const objects = collectAllObjects();
-    console.log(`共收集到 ${objects.length} 个全局对象`);
-    
-    renderObjects(objects);
+    console.log('初始化JavaScript对象层级探测器...');
+    renderTree();
     
     // 添加键盘快捷键
     document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'k') {
+        if (e.ctrlKey && e.key === 'f') {
             e.preventDefault();
             document.getElementById('searchInput').focus();
         }
         if (e.key === 'Escape') {
             document.getElementById('searchInput').value = '';
-            filterObjects();
+            searchTree();
         }
     });
     
-    // 添加右键菜单
-    document.addEventListener('contextmenu', function(e) {
-        if (e.target.classList.contains('object-name')) {
-            e.preventDefault();
-            showObjectContextMenu(e.target.textContent, e.clientX, e.clientY);
-        }
-    });
-    
-    // 点击其他地方关闭右键菜单
-    document.addEventListener('click', function() {
-        const menu = document.getElementById('context-menu');
-        if (menu) menu.remove();
-    });
+    // 自动展开全局对象
+    if (CONFIG.autoExpandGlobal) {
+        setTimeout(() => {
+            const rootNodes = document.querySelectorAll('.tree > .tree-item > .tree-node');
+            rootNodes.forEach((node, index) => {
+                if (index < 5) { // 只展开前5个，避免性能问题
+                    setTimeout(() => node.click(), index * 100);
+                }
+            });
+        }, 500);
+    }
 });
 
-// 右键菜单功能
-function showObjectContextMenu(objectName, x, y) {
-    const existingMenu = document.getElementById('context-menu');
-    if (existingMenu) existingMenu.remove();
-    
-    const menu = document.createElement('div');
-    menu.id = 'context-menu';
-    menu.style.cssText = `
-        position: fixed;
-        top: ${y}px;
-        left: ${x}px;
-        background: #2d2d30;
-        border: 1px solid #3e3e3e;
-        border-radius: 4px;
-        padding: 5px 0;
-        z-index: 10000;
-        min-width: 150px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    `;
-    
-    const options = [
-        { text: '在Console中检查', action: () => inspectInConsole(objectName) },
-        { text: '复制对象名称', action: () => copyToClipboard(objectName) },
-        { text: '复制对象值', action: () => copyValueToClipboard(objectName) },
-        { separator: true },
-        { text: '执行函数', action: () => executeFunction(objectName) },
-        { text: '设为全局变量', action: () => setAsGlobalVariable(objectName) }
-    ];
-    
-    options.forEach(option => {
-        if (option.separator) {
-            const separator = document.createElement('hr');
-            separator.style.cssText = 'border: none; border-top: 1px solid #3e3e3e; margin: 5px 0;';
-            menu.appendChild(separator);
-        } else {
-            const item = document.createElement('div');
-            item.textContent = option.text;
-            item.style.cssText = `
-                padding: 8px 12px;
-                cursor: pointer;
-                color: #cccccc;
-                font-size: 13px;
-            `;
-            item.onmouseenter = () => item.style.background = '#3e3e3e';
-            item.onmouseleave = () => item.style.background = '';
-            item.onclick = option.action;
-            menu.appendChild(item);
-        }
-    });
-    
-    document.body.appendChild(menu);
-}
-
-function inspectInConsole(objectName) {
-    console.log(`检查对象: ${objectName}`);
-    console.log(window[objectName]);
-    console.group(`${objectName} 的属性`);
-    console.dir(window[objectName]);
-    console.groupEnd();
-    
-    const menu = document.getElementById('context-menu');
-    if (menu) menu.remove();
-}
-
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        console.log(`已复制: ${text}`);
-    });
-    
-    const menu = document.getElementById('context-menu');
-    if (menu) menu.remove();
-}
-
-function copyValueToClipboard(objectName) {
-    try {
-        const value = window[objectName];
-        const text = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
-        navigator.clipboard.writeText(text).then(() => {
-            console.log(`已复制 ${objectName} 的值`);
-        });
-    } catch (error) {
-        console.error('复制失败:', error);
+// 点击其他地方关闭工具提示
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#tooltip') && !e.target.closest('.tree-node')) {
+        hideTooltip();
     }
-    
-    const menu = document.getElementById('context-menu');
-    if (menu) menu.remove();
-}
-
-function executeFunction(objectName) {
-    const func = window[objectName];
-    if (typeof func === 'function') {
-        try {
-            const result = func();
-            console.log(`执行 ${objectName}():`, result);
-        } catch (error) {
-            console.error(`执行 ${objectName} 时出错:`, error);
-        }
-    }
-    
-    const menu = document.getElementById('context-menu');
-    if (menu) menu.remove();
-}
-
-function setAsGlobalVariable(objectName) {
-    // 已经在全局作用域中，这里可以添加其他操作
-    console.log(`${objectName} 已经是全局变量`);
-    
-    const menu = document.getElementById('context-menu');
-    if (menu) menu.remove();
-}
-
-// ========================= 添加性能监控 =========================
-function monitorPerformance() {
-    const startTime = performance.now();
-    
-    setTimeout(() => {
-        const endTime = performance.now();
-        const loadTime = endTime - startTime;
-        
-        const statsDiv = document.createElement('div');
-        statsDiv.style.cssText = `
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: #007acc;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            z-index: 9998;
-            opacity: 0.9;
-        `;
-        statsDiv.textContent = `页面加载时间: ${loadTime.toFixed(2)}ms`;
-        document.body.appendChild(statsDiv);
-        
-        setTimeout(() => statsDiv.remove(), 3000);
-    }, 100);
-}
-
-// 启动性能监控
-monitorPerformance();
+});
 </script>
 </body>
 </html>
