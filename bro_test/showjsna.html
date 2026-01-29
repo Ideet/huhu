@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JavaScript对象层级探测器</title>
+    <title>JavaScript对象层级探测器 - 修复版</title>
     <style>
         #object-explorer {
             position: fixed;
@@ -74,7 +74,6 @@
             border-radius: 4px;
         }
         
-        /* 树形结构样式 */
         .tree {
             margin-left: 0;
             list-style: none;
@@ -161,7 +160,6 @@
             display: block;
         }
         
-        /* 不同类型的图标和颜色 */
         .icon-function { color: #4ec9b0; }
         .icon-object { color: #569cd6; }
         .icon-string { color: #ce9178; }
@@ -170,7 +168,6 @@
         .icon-undefined { color: #888; }
         .icon-symbol { color: #c586c0; }
         
-        /* 工具提示 */
         .tooltip {
             position: absolute;
             background: #2d2d30;
@@ -198,31 +195,55 @@
         .close-btn:hover, .copy-btn:hover {
             background: #3e3e3e;
         }
+        
+        .method-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .method-item {
+            padding: 5px;
+            background: #252525;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .method-item:hover {
+            background: #2d2d2d;
+        }
     </style>
 </head>
 <body style="background: #0e0e0e; margin: 0; padding: 0;">
     <div id="object-explorer">
         <div class="header">
-            <div class="title">🌐 JavaScript对象层级探测器</div>
+            <div class="title">🌐 JavaScript对象层级探测器 - 修复版</div>
             <div class="stats">
                 <span id="total-count">加载中...</span>
+                <span id="method-count" style="margin-left: 10px; color: #4ec9b0;"></span>
             </div>
             <button class="close-btn" onclick="toggleExplorer()">隐藏面板</button>
-            <button class="copy-btn" onclick="exportTree()">导出树结构</button>
+            <button class="copy-btn" onclick="testWindowOpen()">测试open</button>
         </div>
         
         <div class="controls">
-            <input type="text" id="searchInput" class="search-box" placeholder="搜索对象、属性或方法..." 
+            <input type="text" id="searchInput" class="search-box" placeholder="搜索open、alert、close等..." 
                    onkeyup="searchTree()">
-            <button class="control-btn" onclick="expandAll()">展开全部</button>
-            <button class="control-btn" onclick="collapseAll()">折叠全部</button>
-            <button class="control-btn" onclick="showGlobalOnly()">仅显示全局对象</button>
-            <button class="control-btn" onclick="showFunctionsOnly()">仅显示方法</button>
+            <button class="control-btn" onclick="expandWindow()">展开window</button>
+            <button class="control-btn" onclick="showMethods()">显示方法</button>
+            <button class="control-btn" onclick="showProperties()">显示属性</button>
             <button class="control-btn" onclick="refresh()">刷新</button>
         </div>
         
         <div id="tree-container">
             <!-- 树形结构将在这里动态生成 -->
+        </div>
+        
+        <div id="method-preview" style="margin-top: 20px; display: none;">
+            <h3 style="color: #4ec9b0; margin-bottom: 10px;">常用window方法预览:</h3>
+            <div class="method-list" id="common-methods"></div>
         </div>
         
         <div id="tooltip" class="tooltip"></div>
@@ -231,39 +252,130 @@
 <script>
 // ========================= 配置选项 =========================
 const CONFIG = {
-    maxDepth: 4,                // 最大递归深度
-    maxChildren: 50,            // 每个节点最多显示的子节点数
-    showPrototypeChain: true,   // 是否显示原型链
-    showPrivateProperties: false, // 是否显示私有属性
-    autoExpandGlobal: true,     // 是否自动展开全局对象
-    valuePreviewLength: 80      // 值预览长度
+    maxDepth: 3,
+    maxChildren: 200,
+    showPrototypeChain: true,
+    showPrivateProperties: false,
+    autoExpandWindow: true,
+    valuePreviewLength: 50
 };
 
-// ========================= 主要对象树 =========================
-const ROOT_OBJECTS = [
-    { name: 'window', obj: window, description: '全局窗口对象' },
-    { name: 'document', obj: document, description: '文档对象' },
-    { name: 'navigator', obj: navigator, description: '浏览器信息对象' },
-    { name: 'location', obj: location, description: 'URL位置对象' },
-    { name: 'history', obj: history, description: '历史记录对象' },
-    { name: 'console', obj: console, description: '控制台对象' },
-    { name: 'Math', obj: Math, description: '数学对象' },
-    { name: 'JSON', obj: JSON, description: 'JSON对象' },
-    { name: 'Date', obj: Date, description: '日期构造函数' },
-    { name: 'Array', obj: Array, description: '数组构造函数' },
-    { name: 'Object', obj: Object, description: '对象构造函数' },
-    { name: 'Function', obj: Function, description: '函数构造函数' },
-    { name: 'String', obj: String, description: '字符串构造函数' },
-    { name: 'Number', obj: Number, description: '数字构造函数' },
-    { name: 'Boolean', obj: Boolean, description: '布尔构造函数' },
-    { name: 'RegExp', obj: RegExp, description: '正则表达式构造函数' },
-    { name: 'Error', obj: Error, description: '错误构造函数' },
-    { name: 'Promise', obj: Promise, description: 'Promise构造函数' },
-    { name: 'localStorage', obj: localStorage, description: '本地存储' },
-    { name: 'sessionStorage', obj: sessionStorage, description: '会话存储' },
-    { name: 'crypto', obj: crypto, description: '加密对象' },
-    { name: 'performance', obj: performance, description: '性能对象' }
-];
+// ========================= 修复的window属性收集函数 =========================
+function getWindowPropertiesEnhanced() {
+    const properties = [];
+    const seen = new Set();
+    
+    console.log("开始收集window属性...");
+    
+    // 1. 使用 Object.getOwnPropertyNames 获取所有自有属性
+    try {
+        const ownProps = Object.getOwnPropertyNames(window);
+        console.log(`Object.getOwnPropertyNames 找到 ${ownProps.length} 个属性`);
+        
+        for (const prop of ownProps) {
+            if (seen.has(prop)) continue;
+            if (!CONFIG.showPrivateProperties && prop.startsWith('_')) continue;
+            
+            try {
+                const value = window[prop];
+                const type = getType(value);
+                const descriptor = Object.getOwnPropertyDescriptor(window, prop);
+                
+                properties.push({
+                    name: prop,
+                    value: value,
+                    type: type,
+                    enumerable: descriptor ? descriptor.enumerable : false,
+                    source: 'ownProperty',
+                    descriptor: descriptor,
+                    isMethod: type === 'function'
+                });
+                
+                seen.add(prop);
+            } catch (error) {
+                // 无法访问的属性
+            }
+        }
+    } catch (error) {
+        console.error("获取自有属性时出错:", error);
+    }
+    
+    // 2. 手动添加已知但可能被漏掉的重要方法
+    const importantMethods = [
+        'open', 'close', 'alert', 'confirm', 'prompt', 'print',
+        'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',
+        'requestAnimationFrame', 'cancelAnimationFrame',
+        'getComputedStyle', 'matchMedia',
+        'scroll', 'scrollTo', 'scrollBy',
+        'fetch', 'btoa', 'atob',
+        'postMessage', 'focus', 'blur',
+        'moveTo', 'moveBy', 'resizeTo', 'resizeBy',
+        'getSelection', 'find',
+        'showModalDialog', 'showModelessDialog',
+        'createImageBitmap', 'queueMicrotask',
+        'structuredClone', 'reportError'
+    ];
+    
+    for (const method of importantMethods) {
+        if (!seen.has(method) && method in window) {
+            try {
+                const value = window[method];
+                if (typeof value === 'function') {
+                    properties.push({
+                        name: method,
+                        value: value,
+                        type: 'function',
+                        enumerable: false,
+                        source: 'knownMethod',
+                        isMethod: true,
+                        important: true
+                    });
+                    seen.add(method);
+                }
+            } catch (error) {
+                // 忽略
+            }
+        }
+    }
+    
+    // 3. 添加来自原型链的重要方法
+    const protoMethods = [
+        'toString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf',
+        'propertyIsEnumerable', 'toLocaleString'
+    ];
+    
+    for (const method of protoMethods) {
+        if (!seen.has(method) && method in window) {
+            try {
+                properties.push({
+                    name: method,
+                    value: window[method],
+                    type: 'function',
+                    enumerable: false,
+                    source: 'prototype',
+                    isMethod: true,
+                    inherited: true
+                });
+                seen.add(method);
+            } catch (error) {
+                // 忽略
+            }
+        }
+    }
+    
+    // 4. 按类型和名称排序
+    properties.sort((a, b) => {
+        // 先按是否是方法排序（方法在前）
+        if (a.isMethod && !b.isMethod) return -1;
+        if (!a.isMethod && b.isMethod) return 1;
+        // 再按名称排序
+        return a.name.localeCompare(b.name);
+    });
+    
+    console.log(`总共收集到 ${properties.length} 个window属性，其中 ${properties.filter(p => p.isMethod).length} 个方法`);
+    
+    return properties;
+}
 
 // ========================= 工具函数 =========================
 function getType(obj) {
@@ -300,13 +412,7 @@ function getIcon(type) {
         'symbol': '⚛',
         'date': '📅',
         'regexp': '/',
-        'promise': '⏳',
-        'window': '🪟',
-        'document': '📄',
-        'navigator': '🌐',
-        'math': '🧮',
-        'json': '{}',
-        'error': '⚠'
+        'promise': '⏳'
     };
     return icons[type] || '•';
 }
@@ -324,12 +430,9 @@ function getTypeColor(type) {
         'symbol': '#c586c0',
         'date': '#9cdcfe',
         'regexp': '#d16969',
-        'promise': '#dcdcaa',
-        'window': '#4ec9b0',
-        'document': '#4ec9b0',
-        'default': '#cccccc'
+        'promise': '#dcdcaa'
     };
-    return colors[type] || colors.default;
+    return colors[type] || '#cccccc';
 }
 
 function formatValue(value, type) {
@@ -345,9 +448,10 @@ function formatValue(value, type) {
         }
         
         if (type === 'string') {
-            return `"${value.length > CONFIG.valuePreviewLength 
+            const str = value.length > CONFIG.valuePreviewLength 
                 ? value.substring(0, CONFIG.valuePreviewLength) + '...' 
-                : value}"`;
+                : value;
+            return `"${str}"`;
         }
         
         if (type === 'number' || type === 'boolean') {
@@ -367,88 +471,18 @@ function formatValue(value, type) {
         }
         
         if (type === 'object') {
-            const keys = Object.keys(value);
-            return `Object {${keys.length} properties}`;
+            try {
+                const keys = Object.keys(value);
+                return `Object {${keys.length}}`;
+            } catch {
+                return 'Object {...}';
+            }
         }
         
         return String(value).substring(0, CONFIG.valuePreviewLength);
     } catch (error) {
-        return '[无法访问]';
+        return '[不可访问]';
     }
-}
-
-function getChildren(obj, parentPath = '') {
-    const children = [];
-    
-    if (!obj || typeof obj !== 'object' || parentPath.split('.').length >= CONFIG.maxDepth) {
-        return children;
-    }
-    
-    const seen = new Set();
-    
-    try {
-        // 获取自有属性
-        Object.getOwnPropertyNames(obj).forEach(key => {
-            if (!CONFIG.showPrivateProperties && key.startsWith('_')) return;
-            if (seen.has(key)) return;
-            
-            seen.add(key);
-            
-            try {
-                const value = obj[key];
-                const type = getType(value);
-                const path = parentPath ? `${parentPath}.${key}` : key;
-                
-                children.push({
-                    name: key,
-                    value: value,
-                    type: type,
-                    enumerable: true,
-                    path: path,
-                    isOwnProperty: true
-                });
-            } catch (error) {
-                // 忽略无法访问的属性
-            }
-        });
-        
-        // 获取原型链上的属性
-        if (CONFIG.showPrototypeChain) {
-            let proto = Object.getPrototypeOf(obj);
-            while (proto && proto !== Object.prototype) {
-                Object.getOwnPropertyNames(proto).forEach(key => {
-                    if (!CONFIG.showPrivateProperties && key.startsWith('_')) return;
-                    if (seen.has(key) || key === 'constructor') return;
-                    
-                    seen.add(key);
-                    
-                    try {
-                        const value = obj[key];
-                        const type = getType(value);
-                        const path = parentPath ? `${parentPath}.${key}` : key;
-                        
-                        children.push({
-                            name: key,
-                            value: value,
-                            type: type,
-                            enumerable: false,
-                            path: path,
-                            isOwnProperty: false,
-                            inherited: true
-                        });
-                    } catch (error) {
-                        // 忽略无法访问的属性
-                    }
-                });
-                proto = Object.getPrototypeOf(proto);
-            }
-        }
-    } catch (error) {
-        console.error('获取子属性时出错:', error);
-    }
-    
-    // 按名称排序
-    return children.sort((a, b) => a.name.localeCompare(b.name)).slice(0, CONFIG.maxChildren);
 }
 
 // ========================= 树形结构渲染 =========================
@@ -457,7 +491,7 @@ function createTreeNode(node, level = 0) {
                        node.type !== 'null' && node.type !== 'undefined' &&
                        !(node.type === 'function' && !node.value.prototype);
     
-    const isExpanded = level === 0 && CONFIG.autoExpandGlobal;
+    const isExpanded = level === 0 && CONFIG.autoExpandWindow;
     const icon = getIcon(node.type);
     const typeColor = getTypeColor(node.type);
     const displayValue = formatValue(node.value, node.type);
@@ -467,7 +501,7 @@ function createTreeNode(node, level = 0) {
     return `
         <div class="tree-item" data-node-id="${nodeId}" data-path="${node.path}" data-type="${node.type}">
             <div class="tree-node ${isExpanded ? 'expanded' : ''}" 
-                 onclick="toggleNode(this, '${node.path}')"
+                 onclick="toggleNode(this, '${node.path}', '${node.type}')"
                  onmouseenter="showTooltip(event, '${node.path}')"
                  onmouseleave="hideTooltip()">
                 ${hasChildren ? `
@@ -476,7 +510,7 @@ function createTreeNode(node, level = 0) {
                 <span class="node-icon" style="color: ${typeColor}">${icon}</span>
                 <span class="node-name">${node.name}</span>
                 ${node.inherited ? '<span style="color:#888; font-size:10px; margin:0 5px;">(继承)</span>' : ''}
-                ${!node.enumerable ? '<span style="color:#888; font-size:10px; margin:0 5px;">(不可枚举)</span>' : ''}
+                ${node.important ? '<span style="color:#ff6b6b; font-size:10px; margin:0 5px;">(重要)</span>' : ''}
                 <span class="node-type">${node.type}</span>
                 <span class="node-value">${displayValue}</span>
                 <span class="node-path">${node.path}</span>
@@ -494,30 +528,33 @@ function renderTree() {
     const container = document.getElementById('tree-container');
     container.innerHTML = '';
     
+    console.log("开始渲染树形结构...");
+    
+    // 创建window节点
+    const windowNode = {
+        name: 'window',
+        value: window,
+        type: 'object',
+        enumerable: true,
+        path: 'window',
+        isOwnProperty: true,
+        description: '全局窗口对象'
+    };
+    
     const tree = document.createElement('div');
     tree.className = 'tree';
-    
-    ROOT_OBJECTS.forEach(rootObj => {
-        const node = {
-            name: rootObj.name,
-            value: rootObj.obj,
-            type: getType(rootObj.obj),
-            enumerable: true,
-            path: rootObj.name,
-            isOwnProperty: true,
-            description: rootObj.description
-        };
-        
-        tree.innerHTML += createTreeNode(node, 0);
-    });
+    tree.innerHTML = createTreeNode(windowNode, 0);
     
     container.appendChild(tree);
     
     // 更新统计信息
     updateStats();
+    
+    // 显示常用方法预览
+    showCommonMethods();
 }
 
-function toggleNode(element, path) {
+function toggleNode(element, path, type) {
     const treeNode = element.closest('.tree-item');
     const childrenDiv = treeNode.querySelector('.children');
     
@@ -538,8 +575,50 @@ function toggleNode(element, path) {
         
         // 如果子节点还未加载，现在加载
         if (childrenDiv.children.length === 0) {
-            loadChildren(path, childrenDiv);
+            if (path === 'window') {
+                loadWindowChildren(childrenDiv);
+            } else {
+                loadChildren(path, childrenDiv);
+            }
         }
+    }
+}
+
+function loadWindowChildren(container) {
+    console.log("加载window子节点...");
+    
+    const properties = getWindowPropertiesEnhanced();
+    
+    if (properties.length === 0) {
+        container.innerHTML = '<div style="color:#888; padding:5px;">[无法访问属性]</div>';
+        return;
+    }
+    
+    const children = properties.map(prop => ({
+        name: prop.name,
+        value: prop.value,
+        type: prop.type,
+        enumerable: prop.enumerable,
+        path: `window.${prop.name}`,
+        isOwnProperty: prop.source === 'ownProperty',
+        inherited: prop.inherited,
+        important: prop.important,
+        isMethod: prop.isMethod
+    }));
+    
+    container.innerHTML = children.map(child => createTreeNode(child, 1)).join('');
+    
+    // 更新统计信息
+    updateStats();
+    
+    console.log(`成功加载 ${children.length} 个window子节点`);
+    
+    // 特别标记open方法
+    const openNode = container.querySelector('[data-path="window.open"]');
+    if (openNode) {
+        const nodeElement = openNode.querySelector('.tree-node');
+        nodeElement.style.border = '1px solid #4ec9b0';
+        nodeElement.style.background = '#2a2d2e';
     }
 }
 
@@ -547,7 +626,6 @@ function loadChildren(path, container) {
     const parts = path.split('.');
     let obj = window;
     
-    // 根据路径找到对应的对象
     for (const part of parts) {
         if (obj && typeof obj === 'object' && part in obj) {
             obj = obj[part];
@@ -557,7 +635,34 @@ function loadChildren(path, container) {
         }
     }
     
-    const children = getChildren(obj, path);
+    // 获取子属性
+    const children = [];
+    const seen = new Set();
+    
+    try {
+        const ownProps = Object.getOwnPropertyNames(obj);
+        for (const prop of ownProps) {
+            if (!CONFIG.showPrivateProperties && prop.startsWith('_')) continue;
+            if (seen.has(prop)) continue;
+            
+            try {
+                const value = obj[prop];
+                children.push({
+                    name: prop,
+                    value: value,
+                    type: getType(value),
+                    enumerable: true,
+                    path: `${path}.${prop}`,
+                    isOwnProperty: true
+                });
+                seen.add(prop);
+            } catch (error) {
+                // 忽略
+            }
+        }
+    } catch (error) {
+        // 忽略错误
+    }
     
     if (children.length === 0) {
         container.innerHTML = '<div style="color:#888; padding:5px;">[无属性]</div>';
@@ -573,7 +678,6 @@ function searchTree() {
     const allNodes = document.querySelectorAll('.tree-node');
     
     if (!searchTerm) {
-        // 清除所有高亮
         allNodes.forEach(node => {
             node.style.background = '';
             const item = node.closest('.tree-item');
@@ -585,12 +689,9 @@ function searchTree() {
     allNodes.forEach(node => {
         const item = node.closest('.tree-item');
         const name = node.querySelector('.node-name')?.textContent.toLowerCase() || '';
-        const type = node.querySelector('.node-type')?.textContent.toLowerCase() || '';
         const path = node.querySelector('.node-path')?.textContent.toLowerCase() || '';
         
-        const matches = name.includes(searchTerm) || 
-                       type.includes(searchTerm) || 
-                       path.includes(searchTerm);
+        const matches = name.includes(searchTerm) || path.includes(searchTerm);
         
         if (item) {
             item.style.display = matches ? '' : 'none';
@@ -617,38 +718,37 @@ function searchTree() {
     });
 }
 
-function expandAll() {
-    const allNodes = document.querySelectorAll('.tree-node');
-    allNodes.forEach(node => {
-        if (!node.classList.contains('expanded')) {
-            node.click();
-        }
-    });
-}
-
-function collapseAll() {
-    const allNodes = document.querySelectorAll('.tree-node');
-    allNodes.forEach(node => {
-        if (node.classList.contains('expanded')) {
-            node.click();
-        }
-    });
-}
-
-function showGlobalOnly() {
-    document.getElementById('searchInput').value = '';
+function expandWindow() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.value = '';
     searchTree();
-    // 展开所有根节点
-    const rootNodes = document.querySelectorAll('.tree > .tree-item > .tree-node');
-    rootNodes.forEach(node => {
-        if (!node.classList.contains('expanded')) {
-            node.click();
-        }
-    });
+    
+    // 展开window节点
+    const windowNode = document.querySelector('[data-path="window"] .tree-node');
+    if (windowNode && !windowNode.classList.contains('expanded')) {
+        windowNode.click();
+        
+        // 加载完成后滚动到open方法
+        setTimeout(() => {
+            const openNode = document.querySelector('[data-path="window.open"]');
+            if (openNode) {
+                openNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const nodeElement = openNode.querySelector('.tree-node');
+                nodeElement.style.animation = 'pulse 1.5s';
+            }
+        }, 500);
+    }
 }
 
-function showFunctionsOnly() {
-    document.getElementById('searchInput').value = 'function';
+function showMethods() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.value = 'function';
+    searchTree();
+}
+
+function showProperties() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.value = 'object';
     searchTree();
 }
 
@@ -662,27 +762,72 @@ function toggleExplorer() {
 }
 
 function updateStats() {
-    const totalNodes = document.querySelectorAll('.tree-item').length;
+    const allNodes = document.querySelectorAll('.tree-item');
+    const methodNodes = document.querySelectorAll('.tree-item[data-type="function"]');
+    
     document.getElementById('total-count').textContent = 
-        `总节点数: ${totalNodes}`;
+        `总节点: ${allNodes.length}`;
+    document.getElementById('method-count').textContent = 
+        `方法: ${methodNodes.length}`;
+}
+
+function showCommonMethods() {
+    const container = document.getElementById('method-preview');
+    const list = document.getElementById('common-methods');
+    
+    const commonMethods = [
+        { name: 'open()', desc: '打开新窗口', test: () => window.open('about:blank', '_blank', 'width=400,height=300') },
+        { name: 'close()', desc: '关闭当前窗口', test: () => { if(confirm('确定要关闭窗口吗？')) window.close(); } },
+        { name: 'alert()', desc: '显示警告框', test: () => window.alert('这是alert方法测试') },
+        { name: 'confirm()', desc: '显示确认框', test: () => window.confirm('这是confirm方法测试') },
+        { name: 'prompt()', desc: '显示输入框', test: () => window.prompt('请输入内容:', '测试') },
+        { name: 'setTimeout()', desc: '设置延时执行', test: () => { const id = setTimeout(() => alert('setTimeout测试'), 1000); setTimeout(() => clearTimeout(id), 500); } },
+        { name: 'setInterval()', desc: '设置间隔执行', test: () => { const id = setInterval(() => console.log('interval'), 1000); setTimeout(() => clearInterval(id), 3000); } }
+    ];
+    
+    list.innerHTML = commonMethods.map(method => `
+        <div class="method-item" onclick="${method.test.toString().replace(/\n/g, ' ')}">
+            <strong style="color: #4ec9b0;">${method.name}</strong><br>
+            <span style="color: #888; font-size: 11px;">${method.desc}</span>
+        </div>
+    `).join('');
+    
+    container.style.display = 'block';
+}
+
+function testWindowOpen() {
+    // 在新标签页中打开一个简单的测试页面
+    const newWindow = window.open('', '_blank', 'width=500,height=300,menubar=no,toolbar=no');
+    if (newWindow) {
+        newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>window.open测试页面</title>
+                <style>
+                    body { font-family: Arial; padding: 20px; }
+                    h2 { color: #4ec9b0; }
+                </style>
+            </head>
+            <body>
+                <h2>window.open() 测试成功!</h2>
+                <p>这是一个通过window.open()方法打开的新窗口。</p>
+                <p>当前URL: ${window.location.href}</p>
+                <button onclick="window.close()">关闭此窗口</button>
+            </body>
+            </html>
+        `);
+    } else {
+        alert('可能被浏览器阻止了，请允许弹出窗口');
+    }
 }
 
 function showTooltip(event, path) {
     const tooltip = document.getElementById('tooltip');
-    const parts = path.split('.');
-    let obj = window;
-    let description = '';
-    
-    // 查找对象描述
-    for (const rootObj of ROOT_OBJECTS) {
-        if (rootObj.name === parts[0]) {
-            description = rootObj.description;
-            break;
-        }
-    }
     
     try {
-        // 尝试获取对象值
+        const parts = path.split('.');
+        let obj = window;
         for (const part of parts) {
             if (obj && typeof obj === 'object' && part in obj) {
                 obj = obj[part];
@@ -693,12 +838,13 @@ function showTooltip(event, path) {
         
         const type = getType(obj);
         const value = formatValue(obj, type);
+        const descriptor = Object.getOwnPropertyDescriptor(window, parts[parts.length-1]);
         
         tooltip.innerHTML = `
-            <strong>${path}</strong><br>
+            <strong style="color: #dcdcaa;">${path}</strong><br>
             <span style="color: ${getTypeColor(type)}">类型: ${type}</span><br>
-            ${description ? `描述: ${description}<br>` : ''}
             值: ${value}<br>
+            ${descriptor ? `可枚举: ${descriptor.enumerable ? '是' : '否'}<br>` : ''}
             构造函数: ${obj?.constructor?.name || 'N/A'}
         `;
         
@@ -706,7 +852,10 @@ function showTooltip(event, path) {
         tooltip.style.top = (event.clientY + 15) + 'px';
         tooltip.style.display = 'block';
     } catch (error) {
-        // 忽略错误
+        tooltip.innerHTML = `<strong>${path}</strong><br>无法访问`;
+        tooltip.style.left = (event.clientX + 15) + 'px';
+        tooltip.style.top = (event.clientY + 15) + 'px';
+        tooltip.style.display = 'block';
     }
 }
 
@@ -715,31 +864,20 @@ function hideTooltip() {
     tooltip.style.display = 'none';
 }
 
-function exportTree() {
-    const treeData = ROOT_OBJECTS.map(rootObj => ({
-        name: rootObj.name,
-        type: getType(rootObj.obj),
-        description: rootObj.description,
-        properties: getChildren(rootObj.obj, rootObj.name).map(child => ({
-            name: child.name,
-            type: child.type,
-            path: child.path,
-            inherited: child.inherited
-        }))
-    }));
-    
-    const json = JSON.stringify(treeData, null, 2);
-    navigator.clipboard.writeText(json).then(() => {
-        alert('树结构已复制到剪贴板！');
-    }).catch(err => {
-        console.error('复制失败:', err);
-    });
-}
-
 // ========================= 初始化 =========================
 window.addEventListener('load', function() {
     console.log('初始化JavaScript对象层级探测器...');
+    console.log('window.open方法是否存在:', 'open' in window);
+    console.log('window.open方法的类型:', typeof window.open);
+    
     renderTree();
+    
+    // 自动展开window并显示open方法
+    if (CONFIG.autoExpandWindow) {
+        setTimeout(() => {
+            expandWindow();
+        }, 300);
+    }
     
     // 添加键盘快捷键
     document.addEventListener('keydown', function(e) {
@@ -752,26 +890,18 @@ window.addEventListener('load', function() {
             searchTree();
         }
     });
-    
-    // 自动展开全局对象
-    if (CONFIG.autoExpandGlobal) {
-        setTimeout(() => {
-            const rootNodes = document.querySelectorAll('.tree > .tree-item > .tree-node');
-            rootNodes.forEach((node, index) => {
-                if (index < 5) { // 只展开前5个，避免性能问题
-                    setTimeout(() => node.click(), index * 100);
-                }
-            });
-        }, 500);
-    }
 });
 
-// 点击其他地方关闭工具提示
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('#tooltip') && !e.target.closest('.tree-node')) {
-        hideTooltip();
+// 添加CSS动画
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse {
+        0% { background: #2a2d2e; }
+        50% { background: #0e639c; }
+        100% { background: #2a2d2e; }
     }
-});
+`;
+document.head.appendChild(style);
 </script>
 </body>
 </html>
