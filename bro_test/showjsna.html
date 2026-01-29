@@ -1,0 +1,810 @@
+<html>
+<head>
+    <title>JavaScript对象探测器 - 显示所有对象</title>
+    <style>
+        #object-explorer {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 40px);
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            z-index: 9999;
+            color: #d4d4d4;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007acc;
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4ec9b0;
+        }
+        
+        .stats {
+            font-size: 14px;
+            color: #9cdcfe;
+        }
+        
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: #1177bb;
+        }
+        
+        .search-box {
+            flex-grow: 1;
+            min-width: 200px;
+            padding: 8px;
+            background: #252525;
+            border: 1px solid #3e3e3e;
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .object-item {
+            margin: 5px 0;
+            padding: 8px;
+            background: #252525;
+            border-radius: 4px;
+            border-left: 3px solid #007acc;
+            transition: all 0.2s;
+        }
+        
+        .object-item:hover {
+            background: #2d2d2d;
+            border-left-color: #4ec9b0;
+        }
+        
+        .object-name {
+            color: #dcdcaa;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .object-name:hover {
+            color: #4ec9b0;
+            text-decoration: underline;
+        }
+        
+        .object-type {
+            color: #4ec9b0;
+            font-size: 12px;
+            margin-right: 10px;
+            padding: 2px 6px;
+            background: #1a1a1a;
+            border-radius: 3px;
+        }
+        
+        .object-value {
+            color: #ce9178;
+            font-size: 12px;
+            max-width: 500px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .object-properties {
+            margin-left: 20px;
+            margin-top: 5px;
+            padding-left: 15px;
+            border-left: 1px dashed #3e3e3e;
+            display: none;
+        }
+        
+        .property-item {
+            margin: 3px 0;
+            font-size: 12px;
+        }
+        
+        .property-name {
+            color: #9cdcfe;
+        }
+        
+        .property-type {
+            color: #569cd6;
+            margin: 0 5px;
+        }
+        
+        .category {
+            margin: 15px 0;
+            padding: 10px;
+            background: #2a2d2e;
+            border-radius: 5px;
+            border-left: 4px solid #007acc;
+        }
+        
+        .category-title {
+            color: #4ec9b0;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .toggle-icon {
+            margin-right: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
+        .highlight {
+            background-color: #3a3d41;
+            border: 1px solid #007acc;
+            animation: highlight 1.5s ease-out;
+        }
+        
+        @keyframes highlight {
+            0% { background-color: #0e639c; }
+            100% { background-color: #3a3d41; }
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #2d2d30;
+            color: #cccccc;
+            border: 1px solid #3e3e3e;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #3e3e3e;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 80px;
+            background: #2d2d30;
+            color: #cccccc;
+            border: 1px solid #3e3e3e;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .close-btn:hover {
+            background: #3e3e3e;
+        }
+    </style>
+</head>
+<body style="word-wrap:break-word; background: #0e0e0e; color: #cccccc; padding: 20px;">
+    <div id="object-explorer">
+        <div class="header">
+            <div class="title">🌐 JavaScript全局对象探测器</div>
+            <div class="stats">
+                <span id="total-count">加载中...</span>
+            </div>
+            <button class="close-btn" onclick="toggleExplorer()">隐藏面板</button>
+            <button class="copy-btn" onclick="copyAllObjects()">复制所有对象</button>
+        </div>
+        
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-box" placeholder="搜索对象名称或属性..." 
+                   onkeyup="filterObjects()">
+            <button class="control-btn" onclick="sortByName()">按名称排序</button>
+            <button class="control-btn" onclick="sortByType()">按类型排序</button>
+            <button class="control-btn" onclick="showFunctionsOnly()">仅显示函数</button>
+            <button class="control-btn" onclick="showObjectsOnly()">仅显示对象</button>
+            <button class="control-btn" onclick="showAll()">显示全部</button>
+            <button class="control-btn" onclick="toggleAllCategories()">展开/折叠所有</button>
+        </div>
+        
+        <div id="objects-container">
+            <!-- 对象将在这里动态生成 -->
+        </div>
+    </div>
+
+<script>
+// ========================= 配置选项 =========================
+const CONFIG = {
+    maxPropertiesToShow: 50,     // 每个对象最多显示的属性数量
+    maxValueLength: 100,         // 属性值最大显示长度
+    showPrivateProperties: false, // 是否显示私有属性（以下划线开头的）
+    groupByType: true,           // 是否按类型分组显示
+    autoExpand: false            // 是否自动展开所有对象
+};
+
+// ========================= 数据收集 =========================
+function collectAllObjects() {
+    const allObjects = [];
+    const seen = new Set();
+    
+    // 收集window对象的所有属性
+    for (let key in window) {
+        try {
+            // 跳过重复的
+            if (seen.has(key)) continue;
+            seen.add(key);
+            
+            const value = window[key];
+            const type = typeof value;
+            
+            allObjects.push({
+                name: key,
+                value: value,
+                type: type,
+                enumerable: true
+            });
+        } catch (error) {
+            // 有些属性访问会抛出错误，跳过
+            allObjects.push({
+                name: key,
+                value: undefined,
+                type: 'restricted',
+                enumerable: false,
+                error: error.message
+            });
+        }
+    }
+    
+    // 收集Object.getOwnPropertyNames (包括不可枚举的)
+    Object.getOwnPropertyNames(window).forEach(key => {
+        if (!seen.has(key)) {
+            seen.add(key);
+            try {
+                const value = window[key];
+                allObjects.push({
+                    name: key,
+                    value: value,
+                    type: typeof value,
+                    enumerable: false
+                });
+            } catch (error) {
+                // 忽略错误
+            }
+        }
+    });
+    
+    // 收集Symbol属性
+    Object.getOwnPropertySymbols(window).forEach(symbol => {
+        const key = symbol.toString();
+        if (!seen.has(key)) {
+            seen.add(key);
+            try {
+                const value = window[symbol];
+                allObjects.push({
+                    name: key,
+                    value: value,
+                    type: typeof value,
+                    enumerable: false,
+                    isSymbol: true
+                });
+            } catch (error) {
+                // 忽略错误
+            }
+        }
+    });
+    
+    return allObjects;
+}
+
+// ========================= 工具函数 =========================
+function getObjectProperties(obj) {
+    if (!obj || typeof obj !== 'object') return [];
+    
+    const properties = [];
+    const seen = new Set();
+    
+    try {
+        // 获取自有属性
+        Object.getOwnPropertyNames(obj).forEach(key => {
+            if (!CONFIG.showPrivateProperties && key.startsWith('_')) return;
+            
+            try {
+                const value = obj[key];
+                properties.push({
+                    name: key,
+                    value: value,
+                    type: typeof value,
+                    enumerable: true
+                });
+                seen.add(key);
+            } catch (error) {
+                // 忽略访问错误的属性
+            }
+        });
+        
+        // 获取原型链上的属性
+        let proto = Object.getPrototypeOf(obj);
+        while (proto && proto !== Object.prototype) {
+            Object.getOwnPropertyNames(proto).forEach(key => {
+                if (!seen.has(key) && !CONFIG.showPrivateProperties && key.startsWith('_')) {
+                    try {
+                        properties.push({
+                            name: key,
+                            value: obj[key],
+                            type: typeof obj[key],
+                            enumerable: false,
+                            inherited: true
+                        });
+                        seen.add(key);
+                    } catch (error) {
+                        // 忽略错误
+                    }
+                }
+            });
+            proto = Object.getPrototypeOf(proto);
+        }
+    } catch (error) {
+        console.error('获取对象属性时出错:', error);
+    }
+    
+    return properties.slice(0, CONFIG.maxPropertiesToShow);
+}
+
+function formatValue(value) {
+    if (value === null) return 'null';
+    if (value === undefined) return 'undefined';
+    
+    try {
+        if (typeof value === 'function') {
+            return value.toString().substring(0, CONFIG.maxValueLength) + '...';
+        }
+        
+        if (typeof value === 'object') {
+            if (value instanceof Array) {
+                return `Array[${value.length}]`;
+            }
+            if (value instanceof Date) {
+                return value.toString();
+            }
+            if (value instanceof RegExp) {
+                return value.toString();
+            }
+            return `Object {${Object.keys(value).length} properties}`;
+        }
+        
+        const str = String(value);
+        return str.length > CONFIG.maxValueLength 
+            ? str.substring(0, CONFIG.maxValueLength) + '...' 
+            : str;
+    } catch (error) {
+        return '[无法显示]';
+    }
+}
+
+// ========================= 渲染函数 =========================
+function renderObjects(objects) {
+    const container = document.getElementById('objects-container');
+    if (!container) return;
+    
+    // 更新统计信息
+    document.getElementById('total-count').textContent = 
+        `共发现 ${objects.length} 个对象`;
+    
+    if (CONFIG.groupByType) {
+        renderGrouped(objects);
+    } else {
+        renderUngrouped(objects);
+    }
+}
+
+function renderGrouped(objects) {
+    const container = document.getElementById('objects-container');
+    container.innerHTML = '';
+    
+    // 按类型分组
+    const groups = {
+        'function': { title: '📋 函数 (Functions)', objects: [] },
+        'object': { title: '📦 对象 (Objects)', objects: [] },
+        'string': { title: '🔤 字符串 (Strings)', objects: [] },
+        'number': { title: '🔢 数字 (Numbers)', objects: [] },
+        'boolean': { title: '✅ 布尔值 (Booleans)', objects: [] },
+        'symbol': { title: '💎 Symbol', objects: [] },
+        'undefined': { title: '❓ Undefined', objects: [] },
+        'restricted': { title: '🚫 受限制属性', objects: [] },
+        'other': { title: '📁 其他类型', objects: [] }
+    };
+    
+    objects.forEach(obj => {
+        if (groups[obj.type]) {
+            groups[obj.type].objects.push(obj);
+        } else {
+            groups.other.objects.push(obj);
+        }
+    });
+    
+    // 渲染每个分组
+    Object.entries(groups).forEach(([type, group]) => {
+        if (group.objects.length === 0) return;
+        
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category';
+        categoryDiv.dataset.type = type;
+        
+        categoryDiv.innerHTML = `
+            <div class="category-title" onclick="toggleCategory(this)">
+                <span class="toggle-icon">▶</span>
+                ${group.title} (${group.objects.length})
+            </div>
+            <div class="category-content" style="display: none;">
+                ${group.objects.map(obj => createObjectHTML(obj)).join('')}
+            </div>
+        `;
+        
+        container.appendChild(categoryDiv);
+    });
+    
+    // 默认展开第一个分组
+    const firstCategory = container.querySelector('.category');
+    if (firstCategory && CONFIG.autoExpand) {
+        toggleCategory(firstCategory.querySelector('.category-title'));
+    }
+}
+
+function renderUngrouped(objects) {
+    const container = document.getElementById('objects-container');
+    container.innerHTML = objects.map(obj => createObjectHTML(obj)).join('');
+}
+
+function createObjectHTML(obj) {
+    const properties = getObjectProperties(obj.value);
+    
+    return `
+        <div class="object-item" data-name="${obj.name}" data-type="${obj.type}">
+            <span class="object-type">${obj.type}</span>
+            <span class="object-name" onclick="toggleProperties(this)">
+                ${obj.isSymbol ? '🔷' : ''}${obj.name}
+                ${!obj.enumerable ? '<small style="color:#888;">(不可枚举)</small>' : ''}
+            </span>
+            <span class="object-value" title="${formatValue(obj.value)}">
+                ${formatValue(obj.value)}
+            </span>
+            <div class="object-properties" id="props-${obj.name.replace(/[^a-z0-9]/gi, '-')}">
+                ${properties.length > 0 ? 
+                    properties.map(prop => `
+                        <div class="property-item">
+                            <span class="property-name">${prop.name}</span>
+                            <span class="property-type">(${prop.type})</span>
+                            <span class="object-value">${formatValue(prop.value)}</span>
+                            ${prop.inherited ? '<small style="color:#888;">(继承)</small>' : ''}
+                        </div>
+                    `).join('') : 
+                    '<div style="color:#888; font-style:italic;">无属性或无法访问</div>'
+                }
+                ${properties.length >= CONFIG.maxPropertiesToShow ? 
+                    '<div style="color:#888; font-size:11px;">... 更多属性未显示</div>' : 
+                    ''
+                }
+            </div>
+        </div>
+    `;
+}
+
+// ========================= 交互函数 =========================
+function toggleProperties(element) {
+    const objectItem = element.closest('.object-item');
+    const propsDiv = objectItem.querySelector('.object-properties');
+    const isVisible = propsDiv.style.display === 'block';
+    
+    propsDiv.style.display = isVisible ? 'none' : 'block';
+    
+    if (!isVisible) {
+        // 高亮显示
+        propsDiv.classList.add('highlight');
+        setTimeout(() => propsDiv.classList.remove('highlight'), 1500);
+    }
+}
+
+function toggleCategory(element) {
+    const category = element.closest('.category');
+    const content = category.querySelector('.category-content');
+    const isVisible = content.style.display === 'block';
+    
+    content.style.display = isVisible ? 'none' : 'block';
+    category.classList.toggle('collapsed', isVisible);
+}
+
+function toggleAllCategories() {
+    const categories = document.querySelectorAll('.category');
+    const allCollapsed = Array.from(categories).every(cat => 
+        cat.querySelector('.category-content').style.display === 'none'
+    );
+    
+    categories.forEach(category => {
+        const content = category.querySelector('.category-content');
+        const toggleIcon = category.querySelector('.toggle-icon');
+        content.style.display = allCollapsed ? 'block' : 'none';
+        category.classList.toggle('collapsed', !allCollapsed);
+    });
+}
+
+function filterObjects() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const objectItems = document.querySelectorAll('.object-item');
+    
+    objectItems.forEach(item => {
+        const name = item.dataset.name.toLowerCase();
+        const type = item.dataset.type.toLowerCase();
+        const content = item.textContent.toLowerCase();
+        
+        const isVisible = name.includes(searchTerm) || 
+                         type.includes(searchTerm) || 
+                         content.includes(searchTerm);
+        
+        item.style.display = isVisible ? '' : 'none';
+        
+        // 如果匹配，高亮显示
+        if (isVisible && searchTerm) {
+            item.classList.add('highlight');
+            setTimeout(() => item.classList.remove('highlight'), 1000);
+        }
+    });
+}
+
+function sortByName() {
+    const objects = collectAllObjects();
+    objects.sort((a, b) => a.name.localeCompare(b.name));
+    renderObjects(objects);
+}
+
+function sortByType() {
+    const objects = collectAllObjects();
+    objects.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
+    renderObjects(objects);
+}
+
+function showFunctionsOnly() {
+    const objects = collectAllObjects();
+    const functions = objects.filter(obj => obj.type === 'function');
+    renderObjects(functions);
+}
+
+function showObjectsOnly() {
+    const objects = collectAllObjects();
+    const objectsOnly = objects.filter(obj => obj.type === 'object');
+    renderObjects(objectsOnly);
+}
+
+function showAll() {
+    const objects = collectAllObjects();
+    renderObjects(objects);
+}
+
+function toggleExplorer() {
+    const explorer = document.getElementById('object-explorer');
+    explorer.style.display = explorer.style.display === 'none' ? 'block' : 'none';
+}
+
+function copyAllObjects() {
+    const objects = collectAllObjects();
+    const text = objects.map(obj => 
+        `${obj.name} (${obj.type}): ${formatValue(obj.value)}`
+    ).join('\n');
+    
+    navigator.clipboard.writeText(text).then(() => {
+        alert(`已复制 ${objects.length} 个对象到剪贴板！`);
+    }).catch(err => {
+        console.error('复制失败:', err);
+    });
+}
+
+// ========================= 初始化 =========================
+// 等待页面加载完成
+window.addEventListener('load', function() {
+    console.log('开始收集JavaScript全局对象...');
+    
+    const objects = collectAllObjects();
+    console.log(`共收集到 ${objects.length} 个全局对象`);
+    
+    renderObjects(objects);
+    
+    // 添加键盘快捷键
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+        if (e.key === 'Escape') {
+            document.getElementById('searchInput').value = '';
+            filterObjects();
+        }
+    });
+    
+    // 添加右键菜单
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.classList.contains('object-name')) {
+            e.preventDefault();
+            showObjectContextMenu(e.target.textContent, e.clientX, e.clientY);
+        }
+    });
+    
+    // 点击其他地方关闭右键菜单
+    document.addEventListener('click', function() {
+        const menu = document.getElementById('context-menu');
+        if (menu) menu.remove();
+    });
+});
+
+// 右键菜单功能
+function showObjectContextMenu(objectName, x, y) {
+    const existingMenu = document.getElementById('context-menu');
+    if (existingMenu) existingMenu.remove();
+    
+    const menu = document.createElement('div');
+    menu.id = 'context-menu';
+    menu.style.cssText = `
+        position: fixed;
+        top: ${y}px;
+        left: ${x}px;
+        background: #2d2d30;
+        border: 1px solid #3e3e3e;
+        border-radius: 4px;
+        padding: 5px 0;
+        z-index: 10000;
+        min-width: 150px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    `;
+    
+    const options = [
+        { text: '在Console中检查', action: () => inspectInConsole(objectName) },
+        { text: '复制对象名称', action: () => copyToClipboard(objectName) },
+        { text: '复制对象值', action: () => copyValueToClipboard(objectName) },
+        { separator: true },
+        { text: '执行函数', action: () => executeFunction(objectName) },
+        { text: '设为全局变量', action: () => setAsGlobalVariable(objectName) }
+    ];
+    
+    options.forEach(option => {
+        if (option.separator) {
+            const separator = document.createElement('hr');
+            separator.style.cssText = 'border: none; border-top: 1px solid #3e3e3e; margin: 5px 0;';
+            menu.appendChild(separator);
+        } else {
+            const item = document.createElement('div');
+            item.textContent = option.text;
+            item.style.cssText = `
+                padding: 8px 12px;
+                cursor: pointer;
+                color: #cccccc;
+                font-size: 13px;
+            `;
+            item.onmouseenter = () => item.style.background = '#3e3e3e';
+            item.onmouseleave = () => item.style.background = '';
+            item.onclick = option.action;
+            menu.appendChild(item);
+        }
+    });
+    
+    document.body.appendChild(menu);
+}
+
+function inspectInConsole(objectName) {
+    console.log(`检查对象: ${objectName}`);
+    console.log(window[objectName]);
+    console.group(`${objectName} 的属性`);
+    console.dir(window[objectName]);
+    console.groupEnd();
+    
+    const menu = document.getElementById('context-menu');
+    if (menu) menu.remove();
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        console.log(`已复制: ${text}`);
+    });
+    
+    const menu = document.getElementById('context-menu');
+    if (menu) menu.remove();
+}
+
+function copyValueToClipboard(objectName) {
+    try {
+        const value = window[objectName];
+        const text = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+        navigator.clipboard.writeText(text).then(() => {
+            console.log(`已复制 ${objectName} 的值`);
+        });
+    } catch (error) {
+        console.error('复制失败:', error);
+    }
+    
+    const menu = document.getElementById('context-menu');
+    if (menu) menu.remove();
+}
+
+function executeFunction(objectName) {
+    const func = window[objectName];
+    if (typeof func === 'function') {
+        try {
+            const result = func();
+            console.log(`执行 ${objectName}():`, result);
+        } catch (error) {
+            console.error(`执行 ${objectName} 时出错:`, error);
+        }
+    }
+    
+    const menu = document.getElementById('context-menu');
+    if (menu) menu.remove();
+}
+
+function setAsGlobalVariable(objectName) {
+    // 已经在全局作用域中，这里可以添加其他操作
+    console.log(`${objectName} 已经是全局变量`);
+    
+    const menu = document.getElementById('context-menu');
+    if (menu) menu.remove();
+}
+
+// ========================= 添加性能监控 =========================
+function monitorPerformance() {
+    const startTime = performance.now();
+    
+    setTimeout(() => {
+        const endTime = performance.now();
+        const loadTime = endTime - startTime;
+        
+        const statsDiv = document.createElement('div');
+        statsDiv.style.cssText = `
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #007acc;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 9998;
+            opacity: 0.9;
+        `;
+        statsDiv.textContent = `页面加载时间: ${loadTime.toFixed(2)}ms`;
+        document.body.appendChild(statsDiv);
+        
+        setTimeout(() => statsDiv.remove(), 3000);
+    }, 100);
+}
+
+// 启动性能监控
+monitorPerformance();
+</script>
+</body>
+</html>
