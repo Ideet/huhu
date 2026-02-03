@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>引入外部JS文件示例</title>
+</head>
+<body>
+    <h1>欢迎访问我的网页</h1>
+    <!-- 引入外部JS文件 -->
+    <script>
+        var s = document.createElement('script');
+        s.src = 'https://ideet.github.io/huhu/JS/finddevice.js';
+        s.onload = function() {
+            alert('JS加载成功');
+        };
+        document.head.appendChild(s);
+    </script>
+</body>
+</html>
