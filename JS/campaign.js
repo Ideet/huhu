@@ -570,7 +570,7 @@ const style = document.createElement('style');
                 { api: 'account.getUserId', params: [], label: 'account.getUserId' },
                 { api: 'account.getUserInfo', params: [], label: 'account.getUserInfo' },
                 { api: 'account.getUserToken', params: [], label: 'account.getUserToken' },
-                { api: 'member.getContractedDays', params: [{}], label: 'member.getContractedDays' }
+                { api: 'member.getContractedDays', params: ["queryPackageId": "pkg_12345"], label: 'member.getContractedDays' }
             ];
 
             apiCalls.forEach(({ api, params, label }) => {
