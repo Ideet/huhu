@@ -1,0 +1,27 @@
+{
+"app": {
+"bundleName": "com.sqw.zxhm.huawei",
+"bundleType": "app",
+"versionCode": 1000000,
+"versionName": "1.5.36",
+"label": "DemoA",
+"deployDomain": "应用、图标以及描述文件部署域名", // 域名无https://
+"icons": {
+"normal": "标准图标下载链接",
+"large": "大图标下载链接"
+},
+"minAPIVersion": "4.1.0(11)",
+"targetAPIVersion": "4.1.0(11)",
+"modules": [
+{
+"name": "module1",
+"type": "entry",
+"deviceTypes": [
+"tablet",
+"phone"
+],
+"packageUrl": "https://appdl-drcn.dbankcdn.com/dl/appdl/application/CN/2026080711/1786103460977-5b6ee756-891a-4fc4-80fa-d65bf57640e0.hap?distOpEntity=HWSW",
+"packageHash": "b36757dd3b4bb1d54a9160a75b94ed7058bd074507750e9e088e7c6781716deb" // 在cmd上输入certutil -hashfile + 包路径 + SHA256 命令获取
+},
+}
+}
