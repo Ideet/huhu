@@ -5,13 +5,13 @@
 "versionCode": 1000000,
 "versionName": "1.5.36",
 "label": "DemoA",
-"deployDomain": "应用、图标以及描述文件部署域名", // 域名无https://
+"deployDomain": "appimg-drcn.dbankcdn.com", // 域名无https://
 "icons": {
-"normal": "标准图标下载链接",
-"large": "大图标下载链接"
+"normal": "https://appimg-drcn.dbankcdn.com/application/icon144/phone/da00339357304bd8b1b95deb9bc33a08.webp",
+"large": "https://appimg-drcn.dbankcdn.com/application/icon144/phone/da00339357304bd8b1b95deb9bc33a08.webp"
 },
-"minAPIVersion": "4.1.0(11)",
-"targetAPIVersion": "4.1.0(11)",
+"minAPIVersion": "6.1.0(23)",
+"targetAPIVersion": "6.1.0(23)",
 "modules": [
 {
 "name": "module1",
